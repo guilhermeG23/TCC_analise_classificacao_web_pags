@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Index</title>
+    </head>
+    <body>
+        <hr>
+        <h1>Detalhes do dominio</h1>
+        <hr>
+            <a href="{{ url_for('classificados') }}">Classifcados</a>
+            <a href="{{ url_for('index') }}">Index</a>
+        <hr>
+        <table>
+            <tr>
+                <td>id</td>
+                <td>Dominio</td>
+                <td>url</td>
+                <td>palavras</td>
+                <td>tags</td>
+                <td>Classifcação</td>
+                <td>Detalhes</td>
+            </tr>
+            {% for i in linhas %}
+            <tr>
+                <td>{{ i[0] }}</td>            
+                <td>{{ i[1] }}</td>            
+                <td>{{ i[2] }}</td>            
+                <td>{{ i[3] }}</td>            
+                <td>{{ i[4] }}</td>            
+                <td>{{ i[5] }}</td>            
+                <td>
+                    <form action="{{ url_for('deletar') }}" method="POST">
+                        <input type="hidden" name="id" id="id" value="{{ i[0] }}">
+                        <button type="submit">Deletar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <hr>
+    </body>
+</html>

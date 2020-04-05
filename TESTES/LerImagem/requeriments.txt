@@ -1,0 +1,11 @@
+pip install opencv-python
+
+#Para o clone do git
+#https://github.com/rafaellaurindo/image-classifier-python.git
+pip install sklearn
+
+pip install pandas
+
+pip install matplotlib 
+
+pip install request
