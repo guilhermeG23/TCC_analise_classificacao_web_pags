@@ -6,7 +6,7 @@
     </head>
     <body>
         <hr>
-        <h1>Bem vindo</h1>
+        <h1>Bem vindo - Analisador de página simples</h1>
         <hr>
             <a href="{{ url_for('classificados') }}">Classifcados</a>
         <hr>
@@ -16,5 +16,17 @@
             <button type="submit">Analisar</button> 
         </form>
         <hr>
+        <table>
+            <tr>
+                <td>Dominio</td>
+                <td>Qtd</td>
+            </tr>
+            {% for i in dominios %}
+            <tr>
+                <td>{{ i[0] }}</td>            
+                <td>{{ i[1] }}</td>          
+            </tr>
+            {% endfor %}
+        </table>
     </body>
 </html>

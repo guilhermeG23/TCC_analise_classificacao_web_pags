@@ -16,19 +16,25 @@
                 <td>id</td>
                 <td>Dominio</td>
                 <td>url</td>
-                <td>palavras</td>
-                <td>tags</td>
+                <td>Frases</td>
+                <td>Palavras</td>
+                <td>Tags</td>
+                <td>Imagens</td>
+                <td>Quantidade de linhas</td>
                 <td>Classifcação</td>
-                <td>Detalhes</td>
+                <td>Funcao</td>
             </tr>
             {% for i in linhas %}
             <tr>
                 <td>{{ i[0] }}</td>            
                 <td>{{ i[1] }}</td>            
-                <td>{{ i[2] }}</td>            
-                <td>{{ i[3] }}</td>            
-                <td>{{ i[4] }}</td>            
-                <td>{{ i[5] }}</td>            
+                <td>{{ i[2][:100] }}</td>            
+                <td>{{ i[3][:100] }}...</td>            
+                <td>{{ i[4][:100] }}</td>            
+                <td>{{ i[5][:100] }}</td>            
+                <td>{{ i[6][:100] }}</td>            
+                <td>{{ i[7] }}</td>            
+                <td>{{ i[8] }}</td>            
                 <td>
                     <form action="{{ url_for('deletar') }}" method="POST">
                         <input type="hidden" name="id" id="id" value="{{ i[0] }}">
