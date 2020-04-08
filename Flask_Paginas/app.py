@@ -27,7 +27,7 @@ def detalhes():
     if request.method == "GET":
         sqlite_funcoes.criar_banco()
         identificador = request.args.get('t')
-        tabela = sqlite_funcoes.select_banco(identificador).fetchall()
+        tabela = sqlite_funcoes.select_banco_id(identificador).fetchall()
         return render_template("detalhes.html", linhas=tabela)
     else:
         return redirect(url_for("classificados"))
@@ -45,6 +45,9 @@ def analisar():
 
         #Capturar página
         pagina = anl.capturar_pagina_url(url)
+
+        #Titulo da página
+        titulo = anl.extrar_titulo(pagina)
 
         #Quantidade de linhas do html
         qtd_linhas_pag = anl.qtd_linhas_pagina(pagina)
@@ -67,11 +70,33 @@ def analisar():
         #Todas as palavras do html
         palavras = anl.quantificar_palavras(anl.palavras_listadas(anl.buscar_lista(todas_tags), pagina))
 
+        #Links da pagina
+        links = anl.quantificar_palavras(anl.Extrair_links(pagina, dominio))
+
+        #Links videos
+        videos = anl.quantificar_palavras(anl.Extrair_videos(pagina, dominio))
+
+        #Link audios
+        audios = anl.quantificar_palavras(anl.Extrair_audios(pagina, dominio))
+
+        #Id_Ext_Dominio -> dominio
+        #Url_pagina -> url
+        #Titulo_pagina -> titulo
+        #Frases -> todas_frases
+        #Palavras -> palavras
+        #Tags -> todas_tags
+        #Imagens_Nome -> imagens
+        #Videos_Nome -> videos
+        #Audios_Nome -> audios
+        #Todos_links -> links
+        #qtd_linhas_Pagina -> qtd_linhas_pag
+
         #Forma preguiçosa de se fazer
-        sqlite_funcoes.insert_banco(dominio, url, str(todas_frases), str(palavras), str(todas_tags), str(imagens), qtd_linhas_pag, "1")
+        sqlite_funcoes.insert_banco(dominio, url, titulo, str(todas_frases), str(palavras), str(todas_tags), str(imagens), str(videos), str(audios), str(links), qtd_linhas_pag)
 
         #Mostrar a pagina de analise
         return render_template("analise.html", url=url, dominio=dominio, tags=todas_tags, palavras=palavras)
+    
     else:
 
         #Deu errado volte para o index

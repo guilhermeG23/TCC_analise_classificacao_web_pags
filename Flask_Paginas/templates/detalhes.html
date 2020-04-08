@@ -11,39 +11,37 @@
             <a href="{{ url_for('classificados') }}">Classifcados</a>
             <a href="{{ url_for('index') }}">Index</a>
         <hr>
-        <table>
-            <tr>
-                <td>id</td>
-                <td>Dominio</td>
-                <td>url</td>
-                <td>Frases</td>
-                <td>Palavras</td>
-                <td>Tags</td>
-                <td>Imagens</td>
-                <td>Quantidade de linhas</td>
-                <td>Classifcação</td>
-                <td>Funcao</td>
-            </tr>
-            {% for i in linhas %}
-            <tr>
-                <td>{{ i[0] }}</td>            
-                <td>{{ i[1] }}</td>            
-                <td>{{ i[2][:100] }}</td>            
-                <td>{{ i[3][:100] }}...</td>            
-                <td>{{ i[4][:100] }}</td>            
-                <td>{{ i[5][:100] }}</td>            
-                <td>{{ i[6][:100] }}</td>            
-                <td>{{ i[7] }}</td>            
-                <td>{{ i[8] }}</td>            
-                <td>
-                    <form action="{{ url_for('deletar') }}" method="POST">
-                        <input type="hidden" name="id" id="id" value="{{ i[0] }}">
-                        <button type="submit">Deletar</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+        {% for i in linhas %}
+
+        <p>Id_pagina: {{ i[0] }}</p>
+        <br>
+        <p>Id_Ext_Dominio: {{ i[1] }}</p>
+        <br>
+        <p>Url_pagina: {{ i[2] }}</p>
+        <br>
+        <p>Titulo_pagina: {{ i[3] }}</p>
+        <br>
+        <p>Frases: {{ i[4] }}</p>
+        <br>
+        <p>Palavras: {{ i[5] }}</p>
+        <br>
+        <p>Tags: {{ i[6] }}</p>
+        <br>
+        <p>Imagens_Nome: {{ i[7] }}</p>
+        <br>
+        <p>Videos_Nome: {{ i[8] }}</p>
+        <br>
+        <p>Audios_Nome: {{ i[9] }}</p>
+        <br>
+        <p>Todos_links: {{ i[10] }}</p>
+        <br>
+        <p>qtd_linhas_Pagina: {{ i[11] }}</p>
+        <br>
+        <form action="{{ url_for('deletar') }}" method="POST">
+            <input type="hidden" name="id" id="id" value="{{ i[0] }}">
+            <button type="submit">Deletar</button>
+        </form>
+        {% endfor %}
         <hr>
     </body>
 </html>

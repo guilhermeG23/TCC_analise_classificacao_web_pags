@@ -1,0 +1,44 @@
+#Corpo das tabelas - Ainda em beta
+
+#tabela de dominios
+ID_Domi
+Dominio
+
+#tabelas de páginas extraidas
+ID_pagina
+Dominio 
+Url_pagina
+Titulo_pagina            
+Frases
+Palavras
+Tags
+Imagens_Nome
+Videos_Nome
+Audios_Nome
+Todos_links
+qtd_linhas_Pagina
+
+#tabela de imagems extraidas
+ID_Imagem
+ID_Pagina_Url_Acesso
+Imagem_blob
+
+#tabela de videos extraidos
+ID_Video
+ID_Pagina_Url_Acesso
+Video_blob
+
+#tabela de videos extraidos
+ID_Video
+ID_Pagina_Url_Acesso
+Audio_blob
+
+#tabela de conteudo classifcados
+ID_Classificacao
+ID_Pagina_Url_Acesso
+Tipo
+
+#tabela de conteudo Dominio
+ID_Classificacao
+ID_Pagina_Dominio
+Tipo
