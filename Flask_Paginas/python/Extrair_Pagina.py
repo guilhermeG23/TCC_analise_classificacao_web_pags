@@ -3,16 +3,31 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import replace
+from googletrans import Translator
 
 #Captura pagina
 def capturar_pagina_url(url):
-    page = requests.get(url, timeout=10, verify=False)
-    pagina = BeautifulSoup(page.text, 'html.parser')
-    return pagina
+    try:
+        return requests.get(url, timeout=10, verify=False)
+    except:
+        return False
+ 
+#Trazer o html da página
+def capturar_pagina(url):
+    return BeautifulSoup(url.text, 'html.parser')
+
+#Status da pagina
+def status_url(pagina):
+    return pagina.status_code
 
 #Extrair titulo da página
 def extrar_titulo(pagina):
     return pagina.title.string
+
+#Detectar idioma da página pelo titulo
+def detectar_idioma(titulo):
+    translator = Translator()
+    return translator.detect(titulo).lang
 
 #Contador de linhas
 def qtd_linhas_pagina(pagina):
@@ -133,6 +148,20 @@ def quantificar_palavras(array_palavras):
         except ValueError:
             ja_listadas_palavras.append(interno) 
         ja_listadas_palavras.sort(key = sortSecond, reverse = True) 
+    
+    return ja_listadas_palavras
+
+#Quantificar a qtd de palavras existentes a partir de um array
+def sem_repeticoes(array_palavras):
+
+    ja_listadas_palavras = []
+    
+    for i in range(0, len(array_palavras)):
+        atual = array_palavras[i]
+        try:
+            ja_listadas_palavras.index(atual)
+        except ValueError:
+            ja_listadas_palavras.append(atual) 
     
     return ja_listadas_palavras
 

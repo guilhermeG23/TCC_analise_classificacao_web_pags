@@ -57,105 +57,41 @@
                             </div>
                           </div>
 
+        <!--Corpo da página-->
         <div class="container-pagina">
-            <h1 class="display-4">Detalhes da página</h1>
+            <h1 class="display-4">Ultimas páginas acessadas - Extraidas</h1>
             <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Valor</th>
-                    </tr>
-                </thead>
+              <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Dóminio</th>
+                    <th scope="col">URL</th>
+                    <th scope="col">Detalhes</th>
+                    <th scope="col">Deletar</th>
+
+                </tr>
+              </thead>
                 <tbody>
-                {% for i in pagina_geral %}
+                {% for i in linhas %}
                     <tr>
-                        <td scope="row">Id_pagina:</td>            
-                        <td scope="row">{{ i[0] }}</td>  
-                    </tr>
-                    <tr>
-                        <td scope="row">Id_Ext_Dominio:</td>    
+                        <td scope="row">{{ i[0] }}</td>            
                         <td>{{ i[1] }}</td>          
-                    </tr>
-                    <tr>
-                        <td scope="row">Url_pagina:</td>    
-                        <td>{{ i[2] }}</td>          
-                    </tr>
-                    <tr>
-                        <td scope="row">Titulo_pagina:</td>    
-                        <td>{{ i[3] }}</td>          
-                    </tr>
-                    <tr>
-                        <td scope="row">Quatidade de linhas:</td>    
-                        <td>{{ i[4] }}</td>          
-                    </tr>
-                    <tr>
-                        <td scope="row">Função:</td>    
+                        <td>{{ i[2] }}</td>  
+                        <td>
+                            <form action="{{ url_for('detalhes') }}" method="GET">
+                                <input type="hidden" name="t" value="{{ i[0] }}">
+                                <button type="submit" class="btn btn-primary">Detalhes</button>
+                            </form>
+                        </td>
                         <td>
                             <form action="{{ url_for('deletar') }}" method="POST">
                                 <input type="hidden" name="id" id="id" value="{{ i[0] }}">
                                 <button type="submit" class="btn btn-primary">Deletar</button>
                             </form>
-                        </td>
+                        </td>         
                     </tr>
                 {% endfor %}
-                <tr>
-                    <td scope="row">Frases:</td>            
-                    <td scope="row">
-                        {% for i in frases %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Palavras:</td>            
-                    <td scope="row">
-                        {% for i in palavras %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Tags:</td>            
-                    <td scope="row">
-                        {% for i in tags %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Links:</td>            
-                    <td scope="row">
-                        {% for i in links %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Images:</td>            
-                    <td scope="row">
-                        {% for i in imagens %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Videos:</td>            
-                    <td scope="row">
-                        {% for i in videos %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                <tr>
-                    <td scope="row">Audio:</td>            
-                    <td scope="row">
-                        {% for i in audio %}
-                            <p class="btn btn-primary">{{ i[0] }} - {{ i[1] }}</p>       
-                        {% endfor %}
-                    </td>  
-                </tr>
-                
-                </tbody>
+                <tbody>
             </table>
         </div>
 
