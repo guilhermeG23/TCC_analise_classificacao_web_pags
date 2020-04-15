@@ -3,6 +3,9 @@ import os
 import sqlite_funcoes
 import Extrair_Pagina as anl
 import shutil
+import Analise_modelo
+import re
+
 
 #versao = "Versão: 0.0.1 - Medusa - Rider"
 #versao = "Versão: 0.0.2 - Euryale - Archer"
@@ -44,11 +47,13 @@ def criar_modelos():
         #Requests post
         modelo_nome = request.form.get("modelo_nome")
         pesquisar_dominios = request.form.get("pesquisar_dominios")
+        aprovacao_do_modelo = request.form.get("aprovacao_do_modelo")
 
         #Gerar CSV
         sqlite_funcoes.extracao_csv(modelo_nome, pesquisar_dominios)
 
         #Implementar aqui no meio a I.A
+        Analise_modelo.acionar_IA_classificacao()
 
         #Destruir modelos apos a analise da I.A
         sqlite_funcoes.destruir_modelos_csv()
@@ -63,15 +68,72 @@ def criar_modelos():
     tabela = sqlite_funcoes.select_banco_extraidos().fetchall()
     return render_template("classificar_paginas.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=tabela)
 
-
 #Arrumar esse
 #Pagina para testar os modelos com as classificações já feitas
 @app.route("/testar_modelos")
 def testar_modelos():
     sqlite_funcoes.criar_banco()
     tabela = sqlite_funcoes.select_banco_extraidos().fetchall()
-    return render_template("index.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=tabela)
+    return render_template("testador_modelos.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas="Colocar modelos")
 
+#Comparacao dos modelos com o url
+@app.route("/processamento_modelos", methods=['GET', 'POST'])
+def processamento_modelos():
+    if request.method == "POST":
+        try:
+            #Obter valor do input
+            url = request.form.get("url")
+            modelos = request.form.get("modelos")
+
+            #Capturar página -> Fazer comunicação
+            pagina = anl.capturar_pagina_url(url)
+
+            if len(url) > 0:
+                #Confirma se consegue capturar a pagina
+                if pagina == False :
+                        #Deu errado volte para o index
+                        return redirect(url_for("testar_modelos"))
+                else:
+                    #Confere o estado do URL
+                    if str(anl.status_url(pagina)) == "200":
+    
+                        #Capturar página -> Fazer comunicação
+                        pagina = anl.capturar_pagina_url(url)
+                            
+                        #Extracao e entrada no banco
+                        processar_url(url, pagina)
+
+                        #Variaveis para o trabalho do csv
+                        id_pesquisa = sqlite_funcoes.select_ultimo_insert_paginas()
+                        for i in id_pesquisa:
+                            #Limpar
+                            i = re.sub('[^0-9]', '', str(i))
+                            id_pesquisa = i
+                                    
+                        id_pesquisa = "-{}".format(id_pesquisa)
+                        nome_temporario_para_processo ="1"
+
+                        #Extracao da ultima pagina que fez entrada no banco
+                        sqlite_funcoes.extracao_csv(nome_temporario_para_processo, id_pesquisa)
+
+                        #Comparaca da extracao com os modelos fica bem aqui
+
+                        #Destruir modelos de csv
+                        sqlite_funcoes.destruir_modelos_csv()
+
+                        return redirect(url_for("testar_modelos"))
+        except:
+            return redirect(url_for("testar_modelos"))
+        
+        return redirect(url_for("testar_modelos"))
+
+    else:
+
+        #Deu errado volte para o index
+        return redirect(url_for("testar_modelos"))
+
+
+#Detalhes dos links
 @app.route("/detalhes", methods=['GET', 'POST'])
 def detalhes():
     if request.method == "GET":
@@ -93,7 +155,6 @@ def detalhes():
 
 #Processar a entrada de uma URL
 def processar_url(url, pagina):
-
     #Abrir o banco
     sqlite_funcoes.criar_banco()
     #Trazer o estado da página
@@ -108,13 +169,11 @@ def processar_url(url, pagina):
     dominio = anl.obter_dominio(url)
     #Insert principal da pagina
     sqlite_funcoes.insert_banco_pagina(dominio, url, titulo, qtd_linhas_pag, idioma)
-
     #Extrair ID da ultima página extraida
     id_pagina = sqlite_funcoes.select_ultimo_insert_paginas()
     for i in id_pagina:
         id_pagina = i
     id_pagina = id_pagina[0]
-
     #Todas as tags
     todas_tags = anl.tags_pagina(pagina)
     tags = anl.quantificar_palavras(anl.tags_pagina(pagina))
@@ -140,14 +199,13 @@ def processar_url(url, pagina):
     sqlite_funcoes.insert_geral_para_tabelas_secudarias(id_pagina, "audio", audios)
     sqlite_funcoes.insert_geral_para_tabelas_secudarias(id_pagina, "links", links)
 
+    #Retorno neutro após extracao
     return True
 
 #Extrair página web e entender seus componentes
 @app.route("/analisar_url", methods=['GET', 'POST'])
 def analisar_url():
-
     if request.method == "POST":
-
         try:
             #Obter valor do input
             url = request.form.get("url")
@@ -166,7 +224,6 @@ def analisar_url():
                         #Extracao e entrada no banco
                         processar_url(url, pagina)
                         #Mostrar a pagina de analise
-                        #return render_template("analise.html", url=url, dominio=dominio, tags=todas_tags, palavras=palavras)
                         #return render_template("index.html")
                         return redirect(url_for("index"))
                     else:

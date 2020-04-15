@@ -59,7 +59,7 @@
 
         <!--Corpo da página-->
         <div class="container-pagina">
-            <h1 class="display-4">Classificar modelos</h1>
+            <h1 class="display-4">Classificar páginas com base nos modelos</h1>
 
 
             <div class="jumbotron">
@@ -69,22 +69,19 @@
                 {% endfor %}
                 </div>
                 <hr>
-                <form action="{{ url_for('criar_modelos') }}" method="POST">
+                <form action="{{ url_for('processamento_modelos') }}" method="POST">
                     <div class="form-row align-items-center">
                         <div class="col-sm-6 my-1">
-                            <input type="text" class="form-control" name="modelo_nome" id="modelo_nome" placeholder="Nome do modelo...">
-                            <input type="hidden" name="pesquisar_dominios" id="pesquisar_dominios" value="">
+                            <input type="text" class="form-control" name="url" id="url" placeholder="Nome do modelo...">
+                            <input type="hidden" name="modelos" id="modelos" value="-1">
                         </div>
                         <div class="col-sm-6 my-1">
-                            <input type="text" class="form-control" name="classificar_modelo" id="classificar_modelo" placeholder="Classificação do modelo..." readonly>
-                            <input type="hidden" name="aprovacao_do_modelo" id="aprovacao_do_modelo" value="">
+                            <input type="text" class="form-control" name="saida" id="saida" placeholder="Estado do site..." readonly>
                         </div>
                     </div>
                     <hr>
                     <div class="form-row align-items-center">
-                        <div class="col-sm-6 my-1 text-al text-left">   
-                            <button type="button" class="btn btn-primary" onclick="aprovar()">Aprovar</button>
-                            <button type="button" class="btn btn-danger" onclick="bloquear()">Bloquear</button>
+                        <div class="col-sm-6 my-1 text-al text-right">   
                         </div>
                         <div class="col-sm-6 my-1 text-al text-right">   
                             <button type="button" class="btn btn-success" onclick="confirmar()">Checar</button>
@@ -97,13 +94,13 @@
 
             <hr>
 
-            <h1 class="display-4">Selecionar dominios abaixo</h1>
+            <h1 class="display-4">Selecionar modelos abaixo</h1>
             <table class="table">
               <thead class="thead-dark">
                 <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">Dóminio</th>
-                    <th scope="col">URL</th>
+                    <th scope="col">Modelos</th>
+                    <th scope="col">Estado</th>
                     <th scope="col">Check</th>  
                 </tr>
               </thead>

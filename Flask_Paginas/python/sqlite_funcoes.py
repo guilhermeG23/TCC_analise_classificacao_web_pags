@@ -3,9 +3,13 @@ import os
 import glob
 import shutil
 import replace
+import re
 
 global banco
 banco = "teste.db"
+
+global quebrador_csv
+quebrador_csv = ";"
 
 def contactar_banco():
     return sqlite3.connect(banco)
@@ -334,25 +338,21 @@ def select_varios_bancos(id_entrada, tabela):
 def limpeza_header_tabelas(entrada):
     entrada = entrada.replace(",", "")
     entrada = entrada.replace("[('", "")
-    entrada = entrada.replace("')]", ";")
-    entrada = entrada.replace("') ('", ";")
+    entrada = entrada.replace("')]", quebrador_csv)
+    entrada = entrada.replace("') ('", quebrador_csv)
     return entrada
 
 #Limpaze de conteudo para os csv's
 #Ta bem na mao isso
 def limpeza_conteudos_tabelas(entrada, tabela):
 
-    #Limpa quando é uma frase
-    if tabela == "frases":
-        entrada = entrada.replace("']\"", "'")
-        entrada = entrada.replace("\"['", "'")
-        entrada = entrada.replace("', '", " ")
-        entrada = entrada.replace("()", "_")
-    
-    #Limpa qualquer outra coisa
-    entrada = entrada.replace(", ", ";")
-    entrada = entrada.replace("(", "")
-    entrada = entrada.replace(")", ";")
+    entrada = entrada.replace(";", "__")
+    entrada = entrada.replace("\"", "'")
+    entrada = entrada.replace("['", "\"")
+    entrada = entrada.replace("]'", "\"")
+    entrada = entrada.replace("']", "\"")
+    entrada = entrada.replace("[\"", "\"")
+    entrada = entrada.replace("', '", " ")
 
     return entrada
 
@@ -366,7 +366,7 @@ def extracao_csv(modelo, dominios):
     os.mkdir("csv")
 
     #Tabelas
-    tabelas_bases = ["dominios", "paginas"]
+    tabelas_bases = ["paginas", "dominios"]
     tabelas_secundarias = ["frases", "palavras", "tags", "imagens", "videos", "audio", "links"]
     tabelas_todas = tabelas_bases + tabelas_secundarias
 
@@ -394,40 +394,81 @@ def extracao_csv(modelo, dominios):
         arquivo_csv.write("{}\n".format(colunas))
         arquivo_csv.close()
 
-    #Duas tabelas principais
-    for ids in dominios:
+    #Tabela de páginas
+    pesquisa_valores_dominios = []
+    for valor_id in dominios:
+        valor_id = valor_id.split()
+
         for tabela in tabelas_bases:
+            #Primeiro executa o pagina para ter os valores e depois executa o de dominios
+            if tabela == "paginas":
+                #File CSV
+                arquivo = "{}-{}.csv".format(modelo, tabela)
+                arquivo_csv = open(arquivo, "a+", encoding="utf-8")
 
-            #File CSV
-            arquivo = "{}-{}.csv".format(modelo, tabela)
-            arquivo_csv = open(arquivo, "a+", encoding="utf-8")
+                #Extrair valores da coluna
+                sqlite_insert_with_param = """SELECT * FROM paginas where ids = ? limit 1;"""
 
-            #Extrair valores da coluna
-            sqlite_insert_with_param = """SELECT * FROM {} where ids = ?;""".format(tabela)
-            saida = cursor.execute(sqlite_insert_with_param, ids).fetchall()
-            for i in saida:
-                i = limpeza_conteudos_tabelas(str(i), tabela)
-                arquivo_csv.write("{}\n".format(i))
-            arquivo_csv.close()
+                for linhas in cursor.execute(sqlite_insert_with_param, valor_id).fetchall():
+                    saida_coluna = ""
+                    contador = 0
+                    for coluna in linhas:
+                        arquivo_csv.write("{};".format(str(coluna)))
+                        if contador == 1:
+                            saida_coluna = str(coluna)
+                        contador = contador + 1
+
+                    arquivo_csv.write("\n")
+                    #Contagem de dominios
+                pesquisa_valores_dominios.append(saida_coluna)
+
+                arquivo_csv.close()
+
+    #CSV de dominios
+    pesquisa_valores_dominios = sorted(set(pesquisa_valores_dominios))
+    for pesquisa_select in pesquisa_valores_dominios:
+        pesquisa_select = pesquisa_select.split()
+
+        for tabela in tabelas_bases:
+            #Primeiro executa o pagina para ter os valores e depois executa o de dominios
+            if tabela == "dominios": 
+                #File CSV
+                arquivo = "{}-{}.csv".format(modelo, tabela)
+                arquivo_csv = open(arquivo, "a+", encoding="utf-8")
+                #Extrair valores da coluna
+                sqlite_insert_with_param = """SELECT * FROM dominios where ids = ? group by ids;"""
+                saida = cursor.execute(sqlite_insert_with_param, pesquisa_select).fetchall()
+
+                for linhas in saida:
+                    for coluna in linhas:
+                        arquivo_csv.write("{};".format(str(coluna)))
+                    arquivo_csv.write("\n")
+                arquivo_csv.close()
 
     #Tabela secundarias
     for ids in dominios:
+        ids = ids.split()
+
         for tabela in tabelas_secundarias:
             arquivo = "{}-{}.csv".format(modelo, tabela)
             arquivo_csv = open(arquivo, "a+", encoding="utf-8")
             sqlite_insert_with_param = """SELECT * FROM {} where Id_pagina_ex = ?;""".format(tabela)
             saida = cursor.execute(sqlite_insert_with_param, ids).fetchall()
-            for i in saida:
-                i = limpeza_conteudos_tabelas(str(i), tabela)
-                arquivo_csv.write("{}\n".format(i))
+            for linhas in saida:
+                for coluna in linhas:
+                    coluna = limpeza_conteudos_tabelas(str(coluna), tabela)
+                    arquivo_csv.write("{};".format(str(coluna)))
+                arquivo_csv.write("\n")
             arquivo_csv.close()
-    
+
+    #Fecha banco
     conn.close()
 
     #Mover csv
     for i in glob.glob("*.csv"):
         os.rename(i, "csv/{}".format(i))
 
+    #Saida
     return True
 
 #Destruir modelos csv pos analise

@@ -6,12 +6,12 @@ function confirmar() {
     $.each( $( ".mybuttons" ), function() {
         if ( document.getElementById(this.id).checked == true ) {
             mostrar("mostrar-" + this.id);
-            valores = valores + "-" + document.getElementById(this.id).value
+            valores = valores + "-" + document.getElementById(this.id).value;
         } else {
             sumir("mostrar-" + this.id);
         }
     });
-    document.getElementById('pesquisar_dominios').value = valores
+    document.getElementById('pesquisar_dominios').value = valores;
 }
 
 function mostrar(aparecer) {
@@ -30,7 +30,18 @@ function resetar_selecao() {
             document.getElementById(this.id).checked = false;   
         }
     });
-    document.getElementById('modelo_nome').value = ""
-    document.getElementById('pesquisar_dominios').value = ""
-    confirmar()
+    document.getElementById('modelo_nome').value = "";
+    document.getElementById('pesquisar_dominios').value = "";
+    document.getElementById('classificar_modelo').value = "";
+    confirmar();
+}
+
+/* Estados da classificacao */
+function aprovar() {
+    document.getElementById('classificar_modelo').value = "Aprovado";
+    document.getElementById('aprovacao_do_modelo').value = 0;
+}
+function bloquear() {
+    document.getElementById('classificar_modelo').value = "Bloqueado";
+    document.getElementById('aprovacao_do_modelo').value = 1;
 }
