@@ -36,12 +36,31 @@ function resetar_selecao() {
     confirmar();
 }
 
+/* resetar modelos Modelos */
+function resetar_selecao_modelos() {
+    $.each( $( ".mybuttons" ), function() {
+        if ( document.getElementById(this.id).checked == true ) {
+            document.getElementById(this.id).checked = false;   
+        }
+    });
+    document.getElementById('url').value = "";
+    document.getElementById('pesquisar_dominios').value = "";
+    confirmar();
+}
 /* Estados da classificacao */
 function aprovar() {
     document.getElementById('classificar_modelo').value = "Aprovado";
-    document.getElementById('aprovacao_do_modelo').value = 0;
+    document.getElementById('aprovacao_do_modelo').value = "Aprovado";
 }
 function bloquear() {
     document.getElementById('classificar_modelo').value = "Bloqueado";
-    document.getElementById('aprovacao_do_modelo').value = 1;
+    document.getElementById('aprovacao_do_modelo').value = "Bloqueado";
+}
+
+function alterar_valores_colunas() {
+    if ( document.getElementById(this.id).tagName == 0 ) {
+        document.getElementById(this.id).innerHTML = "Aprovado";
+    } else {
+        document.getElementById(this.id).innerHTML = "Bloqueado";
+    }
 }

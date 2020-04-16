@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
+import shutil
+import re
+import replace
+
 import sqlite_funcoes
 import Extrair_Pagina as anl
-import shutil
 import Analise_modelo
-import re
+import funcoes_analise
 
-
+#Versoes
 #versao = "Versão: 0.0.1 - Medusa - Rider"
 #versao = "Versão: 0.0.2 - Euryale - Archer"
 #versao = "Versão: 0.0.3 - Stheno - Assassins"
@@ -14,6 +17,7 @@ import re
 #versao = "Versão: 0.0.5 - Gorgon - Avenger"
 versao = "Versão: 0.0.6 - Mash - Shielder"
 
+#Flask
 app = Flask(__name__, static_folder='../Static', template_folder='../templates')
 
 #Pagina princiapl
@@ -38,12 +42,18 @@ def classificador_paginas():
     tabela = sqlite_funcoes.select_banco_extraidos().fetchall()
     return render_template("classificar_paginas.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=tabela)
 
+#Pagina para selecionar os que serao classificados
+@app.route("/modelos")
+def modelos():
+    sqlite_funcoes.criar_banco()
+    tabela = sqlite_funcoes.select_modelos().fetchall()
+    return render_template("modelos.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=tabela)
+
 #Criar CSV
 @app.route("/criar_modelos", methods=['GET', 'POST'])
 def criar_modelos():
-
+    criar_diretorio_modelos()
     if request.method == "POST":
-
         #Requests post
         modelo_nome = request.form.get("modelo_nome")
         pesquisar_dominios = request.form.get("pesquisar_dominios")
@@ -51,13 +61,14 @@ def criar_modelos():
 
         #Gerar CSV
         sqlite_funcoes.extracao_csv(modelo_nome, pesquisar_dominios)
-
         #Implementar aqui no meio a I.A
         Analise_modelo.acionar_IA_classificacao()
-
+        Analise_modelo.gerar_modelos_csv()
+        #Insert no banco de modelos
+        sqlite_funcoes.insert_modelos_comparativos(modelo_nome, str(pesquisar_dominios), str(aprovacao_do_modelo))
         #Destruir modelos apos a analise da I.A
         sqlite_funcoes.destruir_modelos_csv()
-
+        #Retorno
         return redirect(url_for("classificador_paginas"))
 
     else:
@@ -72,65 +83,108 @@ def criar_modelos():
 #Pagina para testar os modelos com as classificações já feitas
 @app.route("/testar_modelos")
 def testar_modelos():
-    sqlite_funcoes.criar_banco()
-    tabela = sqlite_funcoes.select_banco_extraidos().fetchall()
-    return render_template("testador_modelos.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas="Colocar modelos")
+    criar_diretorio_modelos()
+    sqlite_funcoes.criar_banco() 
+    valores_modelos = sqlite_funcoes.select_modelos().fetchall()
+    return render_template("testador_modelos.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=valores_modelos)
 
 #Comparacao dos modelos com o url
 @app.route("/processamento_modelos", methods=['GET', 'POST'])
 def processamento_modelos():
+    criar_diretorio_modelos()
+
+    #Limpando os valores do array
+    retornos.clear()
+
+    #Pesquisa tipo post
     if request.method == "POST":
-        try:
-            #Obter valor do input
-            url = request.form.get("url")
-            modelos = request.form.get("modelos")
+        #Obter valor do input
+        url = request.form.get("url")
+        modelos = request.form.get("pesquisar_dominios")
+        tipo_analise_modelo = request.form.get("modelos_de_analise")
 
-            #Capturar página -> Fazer comunicação
-            pagina = anl.capturar_pagina_url(url)
+        #Retorno no array para mostrar a saida
+        retornos.append(tipo_analise_modelo)
+        retornos.append(url)
 
-            if len(url) > 0:
-                #Confirma se consegue capturar a pagina
-                if pagina == False :
-                        #Deu errado volte para o index
-                        return redirect(url_for("testar_modelos"))
-                else:
-                    #Confere o estado do URL
-                    if str(anl.status_url(pagina)) == "200":
+        #Retorno do nomes dos modelo 
+        saidas = modelos.split("-")
+        saidona = []
+        for saida in saidas:
+            if len(saida) > 0:
+                saidona.append(saida)
+        saidas = saidona
+
+        nome_modelos = []
+        for i in saidas:
+            for t in sqlite_funcoes.selecionar_modelos_analise(i):
+                nome_modelos.append(re.sub('[^a-zA-Z0-9]', '', str(t)))
     
-                        #Capturar página -> Fazer comunicação
-                        pagina = anl.capturar_pagina_url(url)
-                            
-                        #Extracao e entrada no banco
-                        processar_url(url, pagina)
-
-                        #Variaveis para o trabalho do csv
-                        id_pesquisa = sqlite_funcoes.select_ultimo_insert_paginas()
-                        for i in id_pesquisa:
-                            #Limpar
-                            i = re.sub('[^0-9]', '', str(i))
-                            id_pesquisa = i
-                                    
-                        id_pesquisa = "-{}".format(id_pesquisa)
-                        nome_temporario_para_processo ="1"
-
-                        #Extracao da ultima pagina que fez entrada no banco
-                        sqlite_funcoes.extracao_csv(nome_temporario_para_processo, id_pesquisa)
-
-                        #Comparaca da extracao com os modelos fica bem aqui
-
-                        #Destruir modelos de csv
-                        sqlite_funcoes.destruir_modelos_csv()
-
-                        return redirect(url_for("testar_modelos"))
-        except:
-            return redirect(url_for("testar_modelos"))
+        retornos.append(nome_modelos)
         
-        return redirect(url_for("testar_modelos"))
+        #Capturar página -> Fazer comunicação
+        pagina = anl.capturar_pagina_url(url)
+        #Confirma se consegue capturar a pagina
+        if pagina == False :
+            #Deu errado volte para o index
+            return redirect(url_for("testar_modelos"))
+        else:
+            #Confere o estado do URL
+            if str(anl.status_url(pagina)) == "200":
+                #Extracao e entrada no banco
+                processar_url(url, pagina)
+                #Variaveis para o trabalho do csv
+                id_pesquisa = sqlite_funcoes.select_ultimo_insert_paginas()
+                for i in id_pesquisa:
+                    #Limpar
+                    i = re.sub('[^0-9]', '', str(i))
+                id_pesquisa = i
+                id_pesquisa = "-{}".format(id_pesquisa)
+                nome_temporario_para_processo ="1"
+                #Extracao da ultima pagina que fez entrada no banco
+                sqlite_funcoes.extracao_csv(nome_temporario_para_processo, id_pesquisa)
+                #Comparaca da extracao com os modelos fica bem aqui
+                retornos.append(funcoes_analise.escolher_analise(tipo_analise_modelo, nome_temporario_para_processo, modelos))
+                #Destruir modelos de csv
+                sqlite_funcoes.destruir_modelos_csv()
 
+    #Retorno
+    return redirect(url_for("exbir_teste_modelos"))
+
+#Detalhes dos modelos
+@app.route("/exbir_teste_modelos", methods=['GET', 'POST'])
+def exbir_teste_modelos():
+    criar_diretorio_modelos()
+    return render_template("resultado_analise_modelo.html", versao=versao, css=css, js=js, links_menu=links_menu, linhas=retornos)
+
+#Detalhes dos modelos
+@app.route("/detalhes_modelos", methods=['GET', 'POST'])
+def detalhes_modelos():
+    criar_diretorio_modelos()
+    if request.method == "GET":
+        sqlite_funcoes.criar_banco()
+        identificador = request.args.get('t')
+        modelos_geral = sqlite_funcoes.selecionar_modelos_detalhes(identificador).fetchall()
+        paginas_contidas = sqlite_funcoes.selecionar_modelos_detalhes_paginas(identificador).fetchall()
+        paginas = []
+        for i in paginas_contidas:
+            for t in str(i).split("-"):
+                id_url = re.sub('[^0-9]', '', str(t))
+                if len(id_url) > 0:
+                    paginas.append(sqlite_funcoes.select_paginas_url(re.sub('[^0-9]', '', str(id_url))))
+
+        exibir_paginas = []
+        for i in paginas:
+            for t in i:
+                t = str(t)
+                t = t.replace("('", "")
+                t = t.replace("n',)", "")
+                t = t.replace("\\", "")
+                exibir_paginas.append(t)
+
+        return render_template("detalhes_modelos.html", versao=versao, css=css, js=js, links_menu=links_menu, modelos_geral=modelos_geral, exibir_paginas=exibir_paginas)
     else:
-
-        #Deu errado volte para o index
-        return redirect(url_for("testar_modelos"))
+        return redirect(url_for("modelos"))
 
 
 #Detalhes dos links
@@ -209,10 +263,9 @@ def analisar_url():
         try:
             #Obter valor do input
             url = request.form.get("url")
-
             #Capturar página -> Fazer comunicação
             pagina = anl.capturar_pagina_url(url)
-
+            #Saber se existe o url
             if len(url) > 0:
                 #Confirma se consegue capturar a pagina
                 if pagina == False :
@@ -231,11 +284,8 @@ def analisar_url():
                         return redirect(url_for("index"))
         except:
             return redirect(url_for("index"))
-        
         return redirect(url_for("index"))
-
     else:
-
         #Deu errado volte para o index
         return redirect(url_for("index"))
 
@@ -244,32 +294,49 @@ def analisar_url():
 @app.route("/analisar_txt", methods=['GET', 'POST'])
 def analisar_txt():
     if request.method == "POST":
-        
         #Requisita o arquivo
         file = request.files["txt"]
-        
         #Cria a pastas
         os.mkdir("uploads")
-
         file.save(os.path.join("uploads", file.filename))
-
         arquivo = "uploads/{}".format(file.filename)
-
         ler_arquivo = open(arquivo, "r")
-
         for i in ler_arquivo:
             url = i
             pagina = anl.capturar_pagina_url(url)
             processar_url(url, pagina)
-        
         ler_arquivo.close()
-
         shutil.rmtree("uploads")
-
         return redirect(url_for("index"))
     else:
         return redirect(url_for("index"))
 
+#Funcao para deletar os modelos pelo ID
+def deleter_modelo_id(entrada):
+    saida = sqlite_funcoes.selecionar_modelos_analise(entrada)
+    modelos_deletar = []
+    for i in saida:
+        modelos_deletar.append(re.sub('[^0-9a-zA-Z]', '', str(i)))
+
+    for modelo in modelos_deletar:
+        os.remove("modelos/{}-audio.csv".format(modelo))
+        os.remove("modelos/{}-dominios.csv".format(modelo))
+        os.remove("modelos/{}-frases.csv".format(modelo))
+        os.remove("modelos/{}-imagens.csv".format(modelo))
+        os.remove("modelos/{}-links.csv".format(modelo))
+        os.remove("modelos/{}-paginas.csv".format(modelo))
+        os.remove("modelos/{}-palavras.csv".format(modelo))
+        os.remove("modelos/{}-tags.csv".format(modelo))
+        os.remove("modelos/{}-videos.csv".format(modelo))
+
+    sqlite_funcoes.delete_modelo_banco(entrada)
+
+    return True
+
+#Criar diretorio modelo para arquivos csv modelos
+def criar_diretorio_modelos():
+    if os.path.exists("modelos") == False:
+        os.mkdir("modelos")
 
 #Deletar uma analise com base no ID
 @app.route("/deletar", methods=['GET', 'POST'])
@@ -281,14 +348,36 @@ def deletar():
     return redirect(url_for("extraidos"))
 
 #Destruit toda a base de dados
-@app.route("/destruir")
-def destruir():
+@app.route("/destruir_banco")
+def destruir_banco():
+    for id_modelo in sqlite_funcoes.selecionar_ids_modelos():
+        id_modelo = re.sub('[^0-9]', '', str(id_modelo))
+        deleter_modelo_id(id_modelo)
+    sqlite_funcoes.destruir_modelos_classificados()
     sqlite_funcoes.destruir_banco_atual()
     return redirect(url_for("index"))
+
+#Destruit toda a base de dados
+@app.route("/destruir_modelos")
+def destruir_modelos():
+    for id_modelo in sqlite_funcoes.selecionar_ids_modelos():
+        deleter_modelo_id(id_modelo)
+    sqlite_funcoes.destruir_modelos_classificados()
+    return redirect(url_for("index"))
+
+#Detalhes dos modelos
+@app.route("/deletar_modelos", methods=['GET', 'POST'])
+def deletar_modelos():
+    if request.method == "POST":
+        sqlite_funcoes.criar_banco()
+        entrada = request.form.get("id")
+        deleter_modelo_id(entrada)  
+    return redirect(url_for("modelos"))
 
 #Executar o flask
 if __name__ == "__main__":
     css = ["./Static/css/reset.css", "./Static/css/bootstrap.css", "./Static/css/css_pessoal.css"]
     js = ["./Static/js/jquery-3.4.1.slim.min.js", "./Static/js/bootstrap.js", "./Static/js/popper.min.js", "./Static/js/js_pessoal.js"]
-    links_menu = ["extraidos", "classificador_paginas", "testar_modelos", "destruir"]
+    links_menu = ["extraidos", "classificador_paginas", "modelos", "testar_modelos", "destruir_banco", "destruir_modelos"]
+    retornos = []
     app.run(debug=True)

@@ -8,7 +8,7 @@ from googletrans import Translator
 #Captura pagina
 def capturar_pagina_url(url):
     try:
-        return requests.get(url, timeout=10, verify=False)
+        return requests.get(url)
     except:
         return False
  
@@ -22,7 +22,10 @@ def status_url(pagina):
 
 #Extrair titulo da página
 def extrar_titulo(pagina):
-    return pagina.title.string
+    try:
+        return pagina.title.string
+    except:
+        return "Sem titulo"
 
 #Detectar idioma da página pelo titulo
 def detectar_idioma(titulo):

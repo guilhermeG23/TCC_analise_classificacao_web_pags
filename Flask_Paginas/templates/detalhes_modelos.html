@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Index - Página de entrada de URL</title>
+        <title>Extraidos</title>
         <!--CSS-->
         {% for i in css %}
             <link rel="stylesheet" href="{{ i }}">
@@ -23,11 +23,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
-                    {% for i in links_menu %}
                     <li class="nav-item active">
+                        {% for i in links_menu %}
                             <a class="nav-link" href="{{ url_for(i) }}">{{ i }}<span class="sr-only">(current)</span></a>
+                        {% endfor %}
                     </li>
-                    {% endfor %}
                     <li class="nav-item active">
                         <button type="button" class="nav-link btn-transparente" data-toggle="modal" data-target="#ajuda_pagina_simples">Ajuda</button>
                   </li>
@@ -57,71 +57,51 @@
                             </div>
                           </div>
 
-        <!--Corpo da página-->
         <div class="container-pagina">
-            <h1 class="display-4">Classificar páginas com base nos modelos</h1>
-
-
-            <div class="jumbotron">
-                <div id="modelos-listados">
-                {% for i in linhas %}
-                    <p class="badge badge-primary text-wrap sumir-transparente-jump" name="id{{ i[0] }}" id="mostrar-id{{ i[0] }}">{{ i[0] }} - {{ i[1] }}</p>
-                {% endfor %}
-                </div>
-                <hr>
-                <form action="{{ url_for('processamento_modelos') }}" method="POST">
-                    <div class="form-row align-items-center">
-                        <div class="col-sm-6 my-1">
-                            <input type="text" class="form-control" name="url" id="url" placeholder="Entre com o site...">
-                            <input type="hidden" name="pesquisar_dominios" id="pesquisar_dominios" value="">
-                        </div>
-                        <div class="col-sm-6 my-1">
-                            <select name="modelos_de_analise" id="modelos_de_analise" class="form-control">
-                                <option default>Selecione um modelo...</option>
-                                <option value="fuzzy">Analise fuzzy de conteudo</option>
-                            </select> 
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="form-row align-items-center">
-                        <div class="col-sm-6 my-1 text-al text-right">   
-                        </div>
-                        <div class="col-sm-6 my-1 text-al text-right">   
-                            <button type="button" class="btn btn-success" onclick="confirmar()">Checar</button>
-                            <button type="button" class="btn btn-danger" onclick="resetar_selecao_modelos()">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Processar</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <hr>
-
-            <h1 class="display-4">Selecionar modelos abaixo</h1>
+            <h1 class="display-4">Detalhes da página</h1>
             <table class="table">
-              <thead class="thead-dark">
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Modelos</th>
-                    <th scope="col">Estado</th>  
-                    <th scope="col">Check</th>  
-                </tr>
-              </thead>
-                <tbody>
-                {% for i in linhas %}
+                <thead class="thead-dark">
                     <tr>
-                        <td>{{ i[0] }}</td>            
-                        <td scope="row">{{ i[1] }}</td>          
-                        <td scope="row">{{ i[3] }}</td>   
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in modelos_geral %}
+                    <tr>
+                        <td scope="row">ID_modelos:</td>            
+                        <td scope="row">{{ i[0] }}</td>  
+                    </tr>
+                    <tr>
+                        <td scope="row">Nome do modelo:</td>    
+                        <td>{{ i[1] }}</td>          
+                    </tr>
+                    <tr>
+                        <td scope="row">Páginas contidas:</td>
+                        <td scope="row">
+                        {% for t in exibir_paginas %}
+                            <p class="badge badge-primary text-wrap">{{ t }}</p>       
+                        {% endfor %}
+                        </td>     
+                    </tr>
+                    <tr>
+                        <td scope="row">Estado classificado:</td>    
+                        <td>{{ i[3] }}</td>          
+                    </tr>
+                    <tr>
+                        <td scope="row">Função:</td>    
                         <td>
-                            <input type="checkbox" class="mybuttons" id="id{{ i[0] }}" name="id{{ i[0] }}" value="{{ i[0] }}">
-                        </td>      
+                            <form action="{{ url_for('deletar_modelos') }}" method="POST">
+                                <input type="hidden" name="id" id="id" value="{{ i[0] }}">
+                                <button type="submit" class="btn btn-primary">Deletar</button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
-                <tbody>
+                </tbody>
             </table>
         </div>
-        
+
         <footer class="bg-dark navbar-brand footer">
             <div class="container">
                 <p>{{ versao }}</p>

@@ -118,7 +118,96 @@ def criar_banco():
     );
     """)
     conn.commit()
+    #Modelos
+    cursor.execute("""
+    CREATE TABLE if not exists modelos (
+        ids INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        nome varchar(10000) NOT NULL,
+        Ids_gerados varchar(10000) not null,
+        aprovacao varchar(20) not null
+    );
+    """)
+    conn.commit()
 
+    conn.close()
+    return True
+
+def select_modelos():
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    return cursor.execute("""select * from modelos order by ids desc;""")
+
+#Destruir todas os dados das tabelas
+def destruir_banco_atual():
+    return os.remove(banco)
+
+#Destruir modelos csv pos analise
+def destruir_modelos_csv():
+    return shutil.rmtree("csv")
+
+#Destruir modelos
+def destruir_modelos_classificados():
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    cursor.execute("""delete from modelos;""")
+    conn.commit()
+    conn.close()
+    return shutil.rmtree("modelos")
+
+#Ultimo insert de pagina no banco
+def select_ultimo_insert_paginas():
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    return cursor.execute("""select ids from paginas order by ids desc limit 1;""")
+
+#Todos os modelos ids
+#selecionar os modelos
+def selecionar_ids_modelos():
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """SELECT ids FROM modelos;"""
+    return cursor.execute(sqlite_insert_with_param)
+
+#selecionar os modelos
+def selecionar_modelos_analise(id_entrada):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """SELECT nome FROM modelos where ids = ?;"""
+    entrada = [id_entrada]
+    return cursor.execute(sqlite_insert_with_param, entrada)
+
+#selecionar os modelos
+def selecionar_modelos_detalhes(id_entrada):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """SELECT * FROM modelos where ids = ?;"""
+    entrada = [id_entrada]
+    return cursor.execute(sqlite_insert_with_param, entrada)
+
+#selecionar os modelos
+def selecionar_modelos_detalhes_paginas(id_entrada):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """SELECT Ids_gerados FROM modelos where ids = ?;"""
+    entrada = [id_entrada]
+    return cursor.execute(sqlite_insert_with_param, entrada)
+
+#selecionar os modelos
+def select_paginas_url(id_entrada):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """SELECT Url_pagina FROM paginas where ids = ?;"""
+    entrada = [id_entrada]
+    return cursor.execute(sqlite_insert_with_param, entrada)
+
+#Insert na tabela de modelos
+def insert_modelos_comparativos(nome, Ids_gerados, aprovacao):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    sqlite_insert_with_param = """INSERT INTO modelos (nome, Ids_gerados, aprovacao) values (?,?,?);"""
+    data_tuple = [nome, Ids_gerados, aprovacao]
+    cursor.execute(sqlite_insert_with_param, data_tuple)
+    conn.commit()
     conn.close()
     return True
 
@@ -221,6 +310,18 @@ def subtrair_dominio(dominio_id):
     conn.close()
     return True
 
+#Deletar modelos 
+#Deleta um extraido da tabela
+def delete_modelo_banco(id_entrada):
+    conn = contactar_banco()
+    cursor = conn.cursor()
+    data_tuple = [id_entrada]
+    sqlite_insert_with_param = """delete from modelos where ids = ?;"""
+    cursor.execute(sqlite_insert_with_param, data_tuple)
+    conn.commit()
+    conn.close()
+    return True
+
 #Deleta um extraido da tabela
 def delete_banco(id_entrada):
     conn = contactar_banco()
@@ -271,15 +372,6 @@ def delete_banco(id_entrada):
 
     conn.close()
     return True
-
-#Destruir todas os dados das tabelas
-def destruir_banco_atual():
-    return os.remove(banco)
-
-def select_ultimo_insert_paginas():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    return cursor.execute("""select ids from paginas order by ids desc limit 1;""")
 
 #Select tudo
 #Select dos extraidos
@@ -471,6 +563,3 @@ def extracao_csv(modelo, dominios):
     #Saida
     return True
 
-#Destruir modelos csv pos analise
-def destruir_modelos_csv():
-    return shutil.rmtree("csv")
