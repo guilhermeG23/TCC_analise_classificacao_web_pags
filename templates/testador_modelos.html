@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{ titulo }}</title>
+        <!--CSS-->
+        {% for i in css %}
+            <link rel="stylesheet" href="{{ i }}">
+        {% endfor %}
+        <!--JS-->
+        {% for i in js %}
+            <script src="{{ i }}"></script> 
+        {% endfor %}
+    </head>
+    <body>
+
+        <!--Menu-->
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand" href="./">Classificador de página Web</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    {% for i in links_menu %}
+                    <li class="nav-item active">
+                            <a class="nav-link" href="{{ url_for(i) }}">{{ i }}<span class="sr-only">(current)</span></a>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item active">
+                        <button type="button" class="nav-link btn-transparente" data-toggle="modal" data-target="#ajuda_pagina_simples">Ajuda</button>
+                  </li>
+                </ul>
+            </div>
+        </nav>
+
+                      <!--Ajuda-->
+                      <div class="modal fade bd-example-modal-xl" id="ajuda_pagina_simples" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl" role="document">
+                          <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Ajuda:</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                      <div class="form-group">
+                                        <label for="recipient-name" class="col-form-label">Trabalho de TCC - Objetivos:</label>                                
+                                        <li><label for="recipient-name" class="col-form-label">Extração de página única HTML/DOM</label></li>
+                                        <li><label for="recipient-name" class="col-form-label">Classificação de página WEB utilizando várias técnicas</label></li>
+                                        <li><label for="recipient-name" class="col-form-label">Emprego de I.A e demais métodos para aplicar uma classificação</label></li>
+                                      </div>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+
+        <!--Corpo da página-->
+        <div class="container-pagina">
+            <h1 class="display-4">Classificar páginas com base nos modelos listados</h1>
+            <div class="jumbotron">
+                <div id="modelos-listados">
+                {% for i in linhas %}
+                    <p class="badge badge-primary text-wrap sumir-transparente-jump" name="id{{ i[0] }}" id="mostrar-id{{ i[0] }}">{{ i[0] }} - {{ i[1] }}</p>
+                {% endfor %}
+                </div>
+                <hr>
+                <form action="{{ url_for('processamento_modelos') }}" method="POST">
+                    <div class="form-row align-items-center">
+                        <div class="col-sm-6 my-1">
+                            <input type="text" class="form-control" name="url" id="url" placeholder="Entre com o site..." required>
+                            <input type="hidden" name="pesquisar_dominios" id="pesquisar_dominios" value="" required>
+                        </div>
+                        <div class="col-sm-6 my-1">
+                            <select name="modelos_de_analise" id="modelos_de_analise" class="form-control" onchange="javascript:mostrar_parcial(this);" required>
+                                <option default>Selecione um modelo...</option>
+                                <option value="fuzzy_ratio_palavra">Analise fuzzy ratio de conteudo(palavras)</option>
+                                <option value="fuzzy_partial_palavra">Analise fuzzy parcial de conteudo(palavras)</option>
+                                <option value="fuzzy_ratio_frase">Analise fuzzy ratio de conteudo(frases)</option>
+                                <option value="fuzzy_partial_frase">Analise fuzzy parcial de conteudo(frases)</option>
+                                <option value="fuzzy_tokenset_partial_frase">Analise fuzzy token set de conteudo(frases) necessita parcial</option>
+                                <option value="fuzzy_tokensort_partial_frase">Analise fuzzy token sort de conteudo(frases) necessita parcial</option>
+                                <option value="dominio_ratio">Analise fuzzy por comparacao de dominios</option>
+                                <option value="dominio_partial">Analise fuzzy por comparação de dominios de forma parcial</option>
+                                <option value="---">---</option>
+                                <option value="ClassLinearRegressionGray">Analise de imagens com Classificação de vetores linear - Escala de cinza</option>
+                                <option value="ClassLinearRegressionColor">Analise de imagens com Classificação de vetores linear - Escala colorida</option>
+                                <option value="VectorLinearRegressionGray">Analise de imagens com Regressão de vetores linear - Escala cinza</option>
+                                <option value="VectorLinearRegressionColor">Analise de imagens com Regressão de vetores linear - Escala colorida</option>
+                                <option value="VectorLinearCGray">Analise de imagens com Regressão do vetor C-Support não linear- Escala cinza</option>
+                                <option value="VectorLinearCColor">Analise de imagens com Regressão do vetor C-Support não linear - Escala colorida</option>
+                                <option value="VectorLinearEpsilonGray">Analise de imagens com Regressão do vetor Epsilon-Support não linear- Escala cinza</option>
+                                <option value="VectorLinearEpsilonColor">Analise de imagens com Regressão do vetor Epsilon-Support não linear - Escala colorida</option>
+                                <option value="TreeDecisionGray">Analise de imagens com base em árvore de decisão- Escala cinza</option>
+                                <option value="TreeDecisionColor">Analise de imagens com base em árvore de decisão - Escala colorida</option>
+                                <option value="---">---</option>
+                                <option value="brutal_Fuzzy_partial">Uso total sobre Fuzzy em analise comparativa(Lento)</option>
+                                <option value="brutal_Img">Uso total de predicão sobre imagens de forma comparativa(Lento)</option>
+                            </select> 
+                        </div>
+                    </div>
+                    <div class="sumir-transparente-jump" id="campo_partial" name="campo_partial">
+                        <hr>
+                            <div class="form-row align-items-center">
+                                <p>Entre com a porcentagem de precisão do parcial(1-100): </p>
+                                <input type="number" class="form-control" name="precisao_partial" id="precisao_partial" min="0" max="100" value="0" placeholder="Entre com o valor de precisao parcial...">
+                            </div>
+                    </div>
+                    <hr>
+                    <div class="form-row align-items-center">
+                        <div class="col-sm-6 my-1 text-al text-right">   
+                        </div>
+                        <div class="col-sm-6 my-1 text-al text-right">   
+                            <button type="button" class="btn btn-success" onclick="confirmar()">Checar</button>
+                            <button type="button" class="btn btn-danger" onclick="resetar_selecao_modelos()">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Processar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <hr>
+
+            <h1 class="display-4">Selecionar modelos abaixo</h1>
+            <table class="table">
+              <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Modelos</th>
+                    <th scope="col">Estado</th>  
+                    <th scope="col">Descrição</th>  
+                    <th scope="col">Check</th>  
+                </tr>
+              </thead>
+                <tbody>
+                {% for i in linhas %}
+                    <tr>
+                        <td>{{ i[0] }}</td>            
+                        <td scope="row">{{ i[1] }}</td>          
+                        <td scope="row">{{ i[3] }}</td>   
+                        <td scope="row">{{ i[4][:50] }}...</td>   
+                        <td>
+                            <input type="checkbox" class="mybuttons" id="id{{ i[0] }}" name="id{{ i[0] }}" value="{{ i[0] }}">
+                        </td>      
+                    </tr>
+                {% endfor %}
+                <tbody>
+            </table>
+        </div>
+        
+        <footer class="bg-dark navbar-brand footer">
+            <div class="container">
+                <p>{{ versao }}</p>
+            </div>
+        </footer>
+
+    </body>
+</html>
