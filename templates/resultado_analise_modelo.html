@@ -4,6 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{{ titulo }}</title>
+        <!--Icone-->
+        <link rel="shortcut icon" href="{{ icone }}" type="image/x-icon">
         <!--CSS-->
         {% for i in css %}
             <link rel="stylesheet" href="{{ i }}">
@@ -76,9 +78,9 @@
                         <h5 class="card-title">Resultado da análise</h5>
                         <ul>
                             <li><p>Tipo de análise: <b>{{ linhas[0] }}</b></p></li>
-                            <li><p>Tempo médio da operação de análise em segundos: <b>{{ linhas[3][2] }}</b></p></li>
+                            <li><p>Tempo médio da operação de análise: <b>{{ linhas[3][2] }}</b></p></li>
                             {% if linhas[4] != "0" %}
-                                <li><p>Porcentagem da precisão parcial: <b>{{ linhas[4] }}%</b></p></li>
+                                <li><p>Valor setado para a semente(Não é o valor de uma semente aleatória): <b>{{ linhas[4] }}</b></p></li>
                             {% endif %}
                             <li><p>URL análisada: <b>{{ linhas[1] }}</b></p></li>
                             <li><p>Quantidade de modelos totais: <b>{{ linhas[3][1][0] }}</b></p></li>

@@ -4,6 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{{ titulo }}</title>
+        <!--Icone-->
+        <link rel="shortcut icon" href="{{ icone }}" type="image/x-icon">
         <!--CSS-->
         {% for i in css %}
             <link rel="stylesheet" href="{{ i }}">
@@ -63,7 +65,7 @@
             <div class="jumbotron">
                 <div id="modelos-listados">
                 {% for i in linhas %}
-                    <p class="badge badge-primary text-wrap sumir-transparente-jump" name="id{{ i[0] }}" id="mostrar-id{{ i[0] }}">{{ i[0] }} - {{ i[1] }}</p>
+                    <p class="badge badge-primary text-wrap sumir-transparente-jump" name="mostrar-id{{ i[0] }}" id="mostrar-id{{ i[0] }}">{{ i[1] }}</p>
                 {% endfor %}
                 </div>
                 <hr>
@@ -74,38 +76,63 @@
                             <input type="hidden" name="pesquisar_dominios" id="pesquisar_dominios" value="" required>
                         </div>
                         <div class="col-sm-6 my-1">
-                            <select name="modelos_de_analise" id="modelos_de_analise" class="form-control" onchange="javascript:mostrar_parcial(this);" required>
+                            <select name="modelos_de_analise" id="modelos_de_analise" class="form-control" onchange="javascript:mostrar_elemento(this);" required>
                                 <option default>Selecione um modelo...</option>
-                                <option value="fuzzy_ratio_palavra">Analise fuzzy ratio de conteudo(palavras)</option>
-                                <option value="fuzzy_partial_palavra">Analise fuzzy parcial de conteudo(palavras)</option>
-                                <option value="fuzzy_ratio_frase">Analise fuzzy ratio de conteudo(frases)</option>
-                                <option value="fuzzy_partial_frase">Analise fuzzy parcial de conteudo(frases)</option>
-                                <option value="fuzzy_tokenset_partial_frase">Analise fuzzy token set de conteudo(frases) necessita parcial</option>
-                                <option value="fuzzy_tokensort_partial_frase">Analise fuzzy token sort de conteudo(frases) necessita parcial</option>
-                                <option value="dominio_ratio">Analise fuzzy por comparacao de dominios</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>   
+                                <!--<option value="fuzzy_ratio_palavra">Analise fuzzy ratio de conteudo(palavras)</option>-->
+                                <option value="fuzzy_palavra">Analise fuzzy parcial de conteudo(palavras)</option>
+                                <option value="fuzzy_tokenset_frase">Analise fuzzy token set de conteudo(frases)</option>
+                                <option value="fuzzy_tokensort_frase">Analise fuzzy token sort de conteudo(frases)</option>
+                                <!--<option value="dominio_ratio">Analise fuzzy por comparacao de dominios</option>-->
                                 <option value="dominio_partial">Analise fuzzy por comparação de dominios de forma parcial</option>
                                 <option value="---">---</option>
-                                <option value="ClassLinearRegressionGray">Analise de imagens com Classificação de vetores linear - Escala de cinza</option>
-                                <option value="ClassLinearRegressionColor">Analise de imagens com Classificação de vetores linear - Escala colorida</option>
-                                <option value="VectorLinearRegressionGray">Analise de imagens com Regressão de vetores linear - Escala cinza</option>
-                                <option value="VectorLinearRegressionColor">Analise de imagens com Regressão de vetores linear - Escala colorida</option>
-                                <option value="VectorLinearCGray">Analise de imagens com Regressão do vetor C-Support não linear- Escala cinza</option>
-                                <option value="VectorLinearCColor">Analise de imagens com Regressão do vetor C-Support não linear - Escala colorida</option>
-                                <option value="VectorLinearEpsilonGray">Analise de imagens com Regressão do vetor Epsilon-Support não linear- Escala cinza</option>
-                                <option value="VectorLinearEpsilonColor">Analise de imagens com Regressão do vetor Epsilon-Support não linear - Escala colorida</option>
-                                <option value="TreeDecisionGray">Analise de imagens com base em árvore de decisão- Escala cinza</option>
-                                <option value="TreeDecisionColor">Analise de imagens com base em árvore de decisão - Escala colorida</option>
                                 <option value="---">---</option>
-                                <option value="brutal_Fuzzy_partial">Uso total sobre Fuzzy em analise comparativa(Lento)</option>
-                                <option value="brutal_Img">Uso total de predicão sobre imagens de forma comparativa(Lento)</option>
+                                <option value="---">---</option>
+                                <option value="uso_total_fuzzy">Uso total de funções fuzzy(Lento)</option>
+                                <!--<option value="uso_total_fuzzy_ratio">Uso total de funções ratio</option>-->
+                                <option value="uso_total_fuzzy_parcial">Uso total de funções parcial(Lento)</option>
+                                <option value="uso_total_fuzzy_frase">Uso total de funções para frases(Lento)</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>
+                                <option value="LinearRegression_imagens">Analise de imagens com Classificação de vetores linear</option>
+                                <option value="VectorLinearRegression_imagens">Analise de imagens com Regressão de vetores linear</option>
+                                <option value="VectorLinearC_imagens">Analise de imagens com Regressão do vetor C-Support não linear</option>
+                                <option value="VectorLinearEpsilon_imagens">Analise de imagens com Regressão do vetor Epsilon-Support não linear</option>
+                                <option value="TreeDecisionClass_imagens">Analise de imagens com base em árvore de decisão via classificação</option>
+                                <option value="TreeDecisionRegre_imagens">Analise de imagens com base em árvore de decisão via regressão</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>
+                                <option value="---">---</option>                                
+                                <option value="Uso_total_processamento_imagens">Uso total de predicão sobre imagens de forma comparativa(Lento)</option>
+                                <option value="Uso_total_funcoes_lineares_imagens">Uso total de predicão sobre imagens de forma usando funções lineares(Lento)</option>
+                                <option value="Uso_total_funcoes_nao_lineares_imagens">Uso total de predicão sobre imagens de forma usando funções não lineares(Lento)</option>
+                                <option value="Uso_total_funcoes_arvore_imagens">Uso total de predicão sobre imagens de forma usando funções de arvore de decisão(Lento)</option>
                             </select> 
                         </div>
+                    </div>      
+                    <div class="sumir-transparente-jump" id="campo_cinza" name="campo_cinza">
+                        <hr>
+                        <div class="form-row align-items-center">
+                            <div class="col-sm-6 my-1">
+                                <p>Aplicar escala de cinza: (Por padrão a analise é feita colorida)</p>
+                            </div>
+                            <div class="col-sm-6 my-1">
+                                <select name="escala_cinza" id="escala_cinza" class="form-control">
+                                    <option default>Selecione a opção...</option>
+                                    <option value="1">Sim</option>
+                                    <option value="0">Não</option>
+                                </select> 
+                            </div>
+                        </div>
                     </div>
-                    <div class="sumir-transparente-jump" id="campo_partial" name="campo_partial">
+                    <div class="sumir-transparente-jump" id="campo_semente" name="campo_semente">
                         <hr>
                             <div class="form-row align-items-center">
-                                <p>Entre com a porcentagem de precisão do parcial(1-100): </p>
-                                <input type="number" class="form-control" name="precisao_partial" id="precisao_partial" min="0" max="100" value="0" placeholder="Entre com o valor de precisao parcial...">
+                                <p>Entre com o valor da semente, lembrando que deixar esse campo por padrão com 0 (zero), o modelo se utiliza-ra de uma semente aleatoria, valores de entreda(1-100): </p>
+                                <input type="number" class="form-control" name="precisao_semente" id="precisao_semente" min="0" max="100" value="0" placeholder="Entre com o valor da semente...">
                             </div>
                     </div>
                     <hr>
@@ -127,7 +154,6 @@
             <table class="table">
               <thead class="thead-dark">
                 <tr>
-                    <th scope="col">ID</th>
                     <th scope="col">Modelos</th>
                     <th scope="col">Estado</th>  
                     <th scope="col">Descrição</th>  
@@ -137,7 +163,6 @@
                 <tbody>
                 {% for i in linhas %}
                     <tr>
-                        <td>{{ i[0] }}</td>            
                         <td scope="row">{{ i[1] }}</td>          
                         <td scope="row">{{ i[3] }}</td>   
                         <td scope="row">{{ i[4][:50] }}...</td>   

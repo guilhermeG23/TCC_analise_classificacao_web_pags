@@ -4,6 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{{ titulo }}</title>
+        <!--Icone-->
+        <link rel="shortcut icon" href="{{ icone }}" type="image/x-icon">
         <!--CSS-->
         {% for i in css %}
             <link rel="stylesheet" href="{{ i }}">
@@ -181,6 +183,9 @@
                 <tr>
                   <th scope="col">URI</th>
                   <th scope="col">Modelos</th>
+                  <th scope="col">Operação</th>
+                  <th scope="col">Tempo necessário</th>
+                  <th scope="col">Semente?</th>
                   <th scope="col">Posição</th>
                 </tr>
               </thead>
@@ -193,15 +198,18 @@
                             <a href="/detalhes_modelos?id_modelo={{t[1]}}" class="badge badge-primary text-wrap">{{ t[0] }}</a>       
                           {% endfor %}    
                         </td>
+                        <td>{{ i[0][2] }}</td>            
+                        <td>{{ i[0][3] }}</td>            
+                        <td>{{ i[0][4] }}</td>            
                         <td scope="row">     
-                        {% if i[0][2] == "Aprovado" %}
-                          <p class="badge badge-success text-wrap">{{ i[0][2] }}</p>    
-                        {% elif i[0][2] == "Desaprovado" %}
-                          <p class="badge badge-danger text-wrap">{{ i[0][2] }}</p>   
-                        {% elif i[0][2] == "Empate" %}
-                          <p class="badge badge-secondary text-wrap">{{ i[0][2] }}</p>   
+                        {% if i[0][5] == "Aprovado" %}
+                          <p class="badge badge-success text-wrap">{{ i[0][5] }}</p>    
+                        {% elif i[0][5] == "Desaprovado" %}
+                          <p class="badge badge-danger text-wrap">{{ i[0][5] }}</p>   
+                        {% elif i[0][5] == "Empate" %}
+                          <p class="badge badge-secondary text-wrap">{{ i[0][5] }}</p>   
                         {% else %}
-                          <p class="badge badge-warning text-wrap">{{ i[0][2] }}</p>    
+                          <p class="badge badge-warning text-wrap">{{ i[0][5] }}</p>    
                         {% endif %}  
                         </td>
                     </tr>

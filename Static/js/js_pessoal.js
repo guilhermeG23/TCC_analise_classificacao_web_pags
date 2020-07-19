@@ -67,11 +67,13 @@ function alterar_valores_colunas() {
 }
 
 /* mostrar campo parcial */
-function mostrar_parcial(elemento) {
+function mostrar_elemento(elemento) {
     var entrada = elemento.value;
-    if (entrada.indexOf("partial") > -1) {
-        mostrar("campo_partial");
+    if (entrada.indexOf("imagens") > -1) {
+        mostrar("campo_semente");
+        mostrar("campo_cinza");
     } else {
-        sumir("campo_partial");
+        sumir("campo_semente");
+        sumir("campo_cinza");
     }
 }

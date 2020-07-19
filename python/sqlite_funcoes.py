@@ -2,11 +2,6 @@
 #Especifico
 import sqlite3
 #Geral
-import os
-import glob
-import shutil
-import replace
-import re
 import pandas
 
 #Import de funcoes
@@ -18,12 +13,21 @@ global quebrador_csv
 banco = "teste.db"
 quebrador_csv = ";"
 
+
+
+"""
+Criando o banco
+"""
+
 #Conectar o banco
 def contactar_banco():
     #garantir que vai abrir o banco
     try:
+        #Conexao
         return sqlite3.connect(banco)
     except:
+        #Erro ao conectar ao banco, vai oa log
+        funcoes_gerais.registrar_log_erros("Nao foi possivel conectar ao banco")
         contactar_banco()
 
 #Criar o banco
@@ -51,6 +55,9 @@ def criar_banco():
             ids INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             Uri varchar(10000) not null,
             Id_modelos varchar(1000) not null,
+            Tipo_analise_modelo varchar(1000) not null,
+            Tempo_medio_operacao varchar(1000) not null, 
+            Semente_necessaria varchar(1000) not null,
             Aprovacao varchar(100) not null
         );
         """)
@@ -170,194 +177,77 @@ def criar_banco():
 
         #Terminar as operações
         conn.close()
-        #Fechar operacoes
-        return True
+
     #Deu errado vem para ca
     except:
-        pass
-
-#Selecao dos modelos
-def select_modelos():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    saida = cursor.execute("""select * from modelos order by ids desc;""").fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#Destruir todas os dados das tabelas
-def destruir_banco_atual():
-    #Cria uma conexao para fechar o banco e dai conseguir deletar o arquivo
-    conn = contactar_banco()
-    conn.commit()
-    conn.close()
-    #Delete o arquivo caso exista
-    if os.path.isfile(banco):
-        os.remove(banco)    
+        #Log
+        funcoes_gerais.registrar_log_erros("Falha ao construir o banco")
+    
+    #Fechar operacoes
     return True
 
-#Destruir modelos csv pos analise
-def destruir_modelos_csv():
-    if os.path.isdir("csv"):
-        shutil.rmtree("csv")
-    return True
 
-#Destruir modelos
-def destruir_modelos_classificados():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    cursor.execute("""delete from modelos;""")
-    conn.commit()
-    conn.close()
-    if os.path.isdir("modelos"):
-        shutil.rmtree("modelos")
-    return True
 
-#Ultimo insert de pagina no banco
-def select_ultimo_insert_paginas():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    saida = cursor.execute("""select ids from paginas order by ids desc limit 1;""").fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+"""
+Operacoes totais com as querys
+"""
 
-#Buscar idiomas das paginas acessadas
-def select_idiomas_extraidos():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    saida = cursor.execute("""select Idioma_pagina from paginas group by Idioma_pagina;""").fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#Todos os modelos ids
-#selecionar os modelos
-def selecionar_ids_modelos():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT ids FROM modelos;"""
-    saida = cursor.execute(sqlite_insert_with_param).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos
-def selecionar_modelos_analise(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT nome FROM modelos where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos e sua aprovacao
-def selecionar_modelos_aprovados(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT nome, aprovacao FROM modelos where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos e sua aprovacao
-def select_aprovacoes(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT aprovacao FROM modelos where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos
-def selecionar_modelos_detalhes(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT * FROM modelos where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos
-def selecionar_modelos_detalhes_paginas(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT Ids_gerados FROM modelos where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#selecionar os modelos
-def select_paginas_url(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT Url_pagina FROM paginas where ids = ?;"""
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-def select_paginas_limit(limite):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """SELECT ids FROM paginas order by ids desc limit ?"""
-    entrada = [limite]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#Insert paginas classificadas 
-def insert_pagina_classificada(uri, modelos, aprovacao):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """INSERT INTO classificados (Uri, Id_modelos, Aprovacao) values (?,?,?);"""
-    data_tuple = [uri, modelos, aprovacao]
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
-    conn.close()
-    return True
-
-#Insert na tabela de modelos
-def insert_modelos_comparativos(nome, Ids_gerados, aprovacao, descricao):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """INSERT INTO modelos (nome, Ids_gerados, aprovacao, descricao) values (?,?,?,?);"""
-    data_tuple = [nome, Ids_gerados, aprovacao, descricao]
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
-    conn.close()
-    return True
-
-#Insert geral em varios bancos diferentes dependente a entrada
-def insert_geral_para_tabelas_secudarias(id_pagina, tabela, entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """INSERT INTO {} (Id_pagina_ex, {}, Qtd) values (?,?,?);""".format(tabela, tabela)
-    for i in range(0, len(entrada)):
-        data_tuple = [id_pagina, str(entrada[i][0]), entrada[i][1]]
-        cursor.execute(sqlite_insert_with_param, data_tuple)
+#Modelo select
+def select_banco_sem_parametros(entrada):
+    try:
+        conn = contactar_banco()
+        cursor = conn.cursor()
+        saida = cursor.execute(entrada).fetchall()
         conn.commit()
-    conn.close()
-    return True
+        conn.close()
+        return saida
+    except:
+        funcoes_gerais.registrar_log_erros("Select sem entradas falhou")
+
+#Modelo select
+def select_banco_com_parametros(chamada, parametros):
+    try:
+        conn = contactar_banco()
+        cursor = conn.cursor()
+        saida = cursor.execute(chamada, parametros).fetchall()
+        conn.commit()
+        conn.close()
+        return saida
+    except:
+        funcoes_gerais.registrar_log_erros("Select sem entradas falhou")
+
+#Modelo para outras funcoes sem paramentros
+def banco_sem_parametros(entrada):
+    try:
+        conn = contactar_banco()
+        cursor = conn.cursor()
+        saida = cursor.execute(entrada)
+        conn.commit()
+        conn.close()
+        return saida
+    except:
+        funcoes_gerais.registrar_log_erros("Operacao em banco sem entradas falhou")
+
+#Modelo com paramentros
+def banco_com_paramentros(chamada, parametros):
+    try:
+        conn = contactar_banco()
+        cursor = conn.cursor()
+        saida = cursor.execute(chamada, parametros)
+        conn.commit()
+        conn.close()
+        return saida
+    except:
+        funcoes_gerais.registrar_log_erros("Operacao em banco com entradas falhou")
+
+
+
+"""
+Funcoes para operacoes mais especificas
+"""
 
 #Insert de dominios
 def insert_banco_dominio(dominio):
-    #Conexao banco
-    conn = contactar_banco()
-    cursor = conn.cursor()
-
     #Confere se o dominio ja existe registrado, se não existe, registra, e se existe, pega o valor do dominio e da insert no atual insert
     Id_Ext_Dominio_Existe = select_banco_nome(dominio)
 
@@ -367,30 +257,15 @@ def insert_banco_dominio(dominio):
 
     if saida == 0:
         #Inserir o dominio caso o mesmo nao exista
-        sqlite_insert_with_param = """INSERT INTO dominios (dominios, Qtd) values (?, ?);"""
-        data_tuple = [dominio, 1]
-        cursor.execute(sqlite_insert_with_param, data_tuple)
-        conn.commit()
+        banco_com_paramentros("""INSERT INTO dominios (dominios, Qtd) values (?, ?);""", [dominio, 1])
     else:
-
         #Atualizar a quantidade de vezes que o dominio é listado
-        sqlite_insert_with_param = """SELECT ids, Qtd FROM dominios where dominios = ?;"""
-        entrada = [dominio]
-        saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-        conn.commit()
-
+        saida = select_banco_com_parametros("""SELECT ids, Qtd FROM dominios where dominios = ?;""", [dominio])
         Id_Dominio = ""
         contador_dominio = ""
         for i in saida:
             Id_Dominio, contador_dominio = i
-
-        data_tuple = [contador_dominio+1, Id_Dominio]
-
-        sqlite_insert_with_param = """UPDATE dominios SET Qtd = ? WHERE ids = ?;"""
-        cursor.execute(sqlite_insert_with_param, data_tuple)
-        conn.commit()
-
-    conn.close()
+        banco_com_paramentros("""UPDATE dominios SET Qtd = ? WHERE ids = ?;""", [contador_dominio+1, Id_Dominio])
 
     #Execute a instrução
     #Traz o ID do dominio
@@ -405,237 +280,198 @@ def insert_banco_dominio(dominio):
 
     return valor_saida 
 
-#Insert no banco
-def insert_banco_pagina(Id_Ext_Dominio, Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    sqlite_insert_with_param = """INSERT INTO paginas (Id_Ext_Dominio, Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data) values (?,?,?,?,?,?,?);"""
-    Id_Ext_Dominio = insert_banco_dominio(Id_Ext_Dominio)
-    data_tuple = [Id_Ext_Dominio,  Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data]
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
-    conn.close()
-    return True
-
 #Subtrair ou deletar dominio
 def subtrair_dominio(dominio_id):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-
-    sqlite_insert_with_param = """select Qtd FROM dominios where ids = ?;"""
-    retorno_dominio = cursor.execute(sqlite_insert_with_param, dominio_id).fetchall()
-    conn.commit()
-
+    retorno_dominio = banco_com_paramentros("""select Qtd FROM dominios where ids = ?;""", dominio_id)
     for i in retorno_dominio:
-        retorno_dominio = int(i[0])
-
+        retorno_dominio = funcoes_gerais.converte_inteiro(i[0])
     if retorno_dominio == 1:
-        sqlite_insert_with_param = """delete from dominios where ids = ?;"""
-        cursor.execute(sqlite_insert_with_param, dominio_id)
+        banco_com_paramentros("""delete from dominios where ids = ?;""", dominio_id)
     else:
-        data_tuple = [retorno_dominio-1, dominio_id[0]]
-        sqlite_insert_with_param = """UPDATE dominios SET Qtd = ? WHERE ids = ?;"""
-        cursor.execute(sqlite_insert_with_param, data_tuple)
-    
-    conn.commit()
-    conn.close()
+        banco_com_paramentros("""UPDATE dominios SET Qtd = ? WHERE ids = ?;""", [retorno_dominio-1, dominio_id[0]])
     return True
 
-#Deletar modelos 
-#Deleta um extraido da tabela
-def delete_modelo_banco(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    data_tuple = [id_entrada]
-    sqlite_insert_with_param = """delete from modelos where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
-    conn.close()
-    return True
 
-#Deleta um extraido da tabela
-def delete_banco(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
 
-    data_tuple = [id_entrada]
+"""
+Operacoes de select
+"""
 
-    sqlite_insert_with_param = """SELECT Id_Ext_Dominio FROM paginas where ids = ?;"""
-    retorno_dominio = cursor.execute(sqlite_insert_with_param, data_tuple)
+#Selecao dos modelos
+def select_modelos():
+    return select_banco_sem_parametros("""select * from modelos order by ids desc;""")
 
-    for i in retorno_dominio:
-        retorno_dominio = i
+#Ultimo insert de pagina no banco
+def select_ultimo_insert_paginas():
+    return select_banco_sem_parametros("""select ids from paginas order by ids desc limit 1;""")
 
-    subtrair_dominio(retorno_dominio)
+#Buscar idiomas das paginas acessadas
+def select_idiomas_extraidos():
+    return select_banco_sem_parametros("""select Idioma_pagina from paginas group by Idioma_pagina;""")
 
-    #Execute a instrução
-    sqlite_insert_with_param = """delete from paginas where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#Todos os modelos ids
+#selecionar os modelos
+def selecionar_ids_modelos():
+    return select_banco_sem_parametros("""select ids from modelos;""")
 
-    sqlite_insert_with_param = """delete from frases where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos
+def selecionar_modelos_analise(id_entrada):
+    return select_banco_com_parametros("""select nome from modelos where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from palavras where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos e sua aprovacao
+def selecionar_modelos_aprovados(id_entrada):
+    return select_banco_com_parametros("""select nome, aprovacao from modelos where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from tags where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos e sua aprovacao
+def select_aprovacoes(id_entrada):
+    return select_banco_com_parametros("""select aprovacao from modelos where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from imagens where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos
+def selecionar_modelos_detalhes(id_entrada):
+    return select_banco_com_parametros("""select * from modelos where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from videos where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos
+def selecionar_modelos_detalhes_paginas(id_entrada):
+    return select_banco_com_parametros("""select Ids_gerados from modelos where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from audios where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
+#selecionar os modelos
+def select_paginas_url(id_entrada):
+    return select_banco_com_parametros("""select Url_pagina from paginas where ids = ?;""", [id_entrada])
 
-    sqlite_insert_with_param = """delete from links where ids = ?;"""
-    cursor.execute(sqlite_insert_with_param, data_tuple)
-    conn.commit()
-
-    conn.close()
-    return True
+def select_paginas_limit(limite):
+    return select_banco_com_parametros("""select ids from paginas order by ids desc limit ?""", [limite])
 
 #Select tudo
 #Select dos extraidos
 def select_banco_all():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    saida = cursor.execute("""select * from paginas;""").fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+    return select_banco_sem_parametros("""select * from paginas;""")
 
 #Select dos extraidos
 def select_banco_extraidos():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    saida = cursor.execute("""select pag.ids, dom.dominios, pag.Url_pagina from paginas as pag inner join dominios as dom on pag.Id_Ext_Dominio = dom.ids order by pag.ids desc limit 100;""").fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+    return select_banco_sem_parametros("""select paginas.ids, dominios.dominios, paginas.Url_pagina from paginas inner join dominios on paginas.Id_Ext_Dominio = dominios.ids order by paginas.ids desc limit 100;""")
 
 #Retorno do dominio ID via o nome do dominio
 def select_banco_nome(dominio):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """SELECT ids FROM dominios where dominios = ?;"""
-    entrada = [dominio]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+    return select_banco_com_parametros("""select ids from dominios where dominios = ?;""", [dominio])
 
-#Top 10 dominios mais acessados
-def select_count_domain():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """SELECT dominios, Qtd FROM dominios order by Qtd desc limit 10;"""
-    saida = cursor.execute(sqlite_insert_with_param).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
-
-#Top 10 ultimos classificados
-def select_count_classificados():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """SELECT Uri, Id_modelos, Aprovacao FROM classificados order by ids desc limit 10;"""
-    saida = cursor.execute(sqlite_insert_with_param).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+#Selecao dos modelos
+def select_modelos():
+    return select_banco_sem_parametros("""select * from modelos order by ids desc;""")
 
 #Top 10 ultimos classificados
 def select_count_classificados_somente_id():
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """SELECT Id_modelos FROM classificados order by ids desc limit 10;"""
-    saida = cursor.execute(sqlite_insert_with_param).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+    return select_banco_sem_parametros("""select Id_modelos from classificados order by ids desc limit 10;""") 
+
+def select_varios_bancos(id_entrada, tabela):
+    return select_banco_com_parametros("""select fr.{}, fr.Qtd from paginas as pag inner join {} as fr on pag.ids = fr.Id_pagina_ex where fr.Id_pagina_ex = ?;""".format(tabela, tabela), [id_entrada])
+
+#Top 10 dominios mais acessados
+def select_count_domain():
+    return select_banco_sem_parametros("""select dominios, Qtd from dominios order by Qtd desc limit 10;""")
+
+#Top 10 ultimos classificados
+def select_count_classificados():
+    return select_banco_sem_parametros("""select Uri, Id_modelos, Tipo_analise_modelo, Tempo_medio_operacao, Semente_necessaria, Aprovacao from classificados order by ids desc limit 10;""")
 
 #Retorno via ID da página
 def select_banco_paginas(id_entrada):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """
-    SELECT pag.ids, dom.dominios, pag.Url_pagina, pag.Endereco_IP, pag.Titulo_pagina, pag.qtd_linhas_Pagina, pag.Idioma_pagina, pag.data
-    from paginas as pag inner join dominios as dom on pag.Id_Ext_Dominio = dom.ids
-    where pag.ids = ? limit 1;""" 
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
+    return select_banco_com_parametros("""select pag.ids, dom.dominios, pag.Url_pagina, pag.Endereco_IP, pag.Titulo_pagina, pag.qtd_linhas_Pagina, pag.Idioma_pagina, pag.data from paginas as pag inner join dominios as dom on pag.Id_Ext_Dominio = dom.ids where pag.ids = ? limit 1;""", [id_entrada])
 
-def select_varios_bancos(id_entrada, tabela):
-    conn = contactar_banco()
-    cursor = conn.cursor()
-    #Execute a instrução
-    sqlite_insert_with_param = """
-    select fr.{}, fr.Qtd 
-    from paginas as pag inner join {} as fr on pag.ids = fr.Id_pagina_ex 
-    where fr.Id_pagina_ex = ?;""".format(tabela, tabela) 
-    entrada = [id_entrada]
-    saida = cursor.execute(sqlite_insert_with_param, entrada).fetchall()
-    conn.commit()
-    conn.close()
-    return saida
 
-#Limpeza do header das tabelas
-def limpeza_header_tabelas(entrada):
-    entrada = entrada.replace(",", "")
-    entrada = entrada.replace("[('", "")
-    entrada = entrada.replace("')]", quebrador_csv)
-    entrada = entrada.replace("') ('", quebrador_csv)
-    return entrada
 
-#Limpaze de conteudo para os csv's
-#Ta bem na mao isso
-def limpeza_conteudos_tabelas(entrada, tabela):
+"""
+Insert
+"""
+    
+#Insert paginas classificadas 
+def insert_pagina_classificada(uri, modelos, tipo_analise_modelo, Tempo_medio_operacao, Semente_necessaria, aprovacao):
+    return banco_com_paramentros("""INSERT INTO classificados (Uri, Id_modelos, Tipo_analise_modelo, Tempo_medio_operacao, Semente_necessaria, Aprovacao) values (?,?,?,?,?,?);""", [uri, modelos, tipo_analise_modelo, Tempo_medio_operacao, Semente_necessaria, aprovacao])
 
-    entrada = entrada.replace(";", "__")
-    entrada = entrada.replace("\"", "'")
-    entrada = entrada.replace("['", "\"")
-    entrada = entrada.replace("]'", "\"")
-    entrada = entrada.replace("']", "\"")
-    entrada = entrada.replace("[\"", "\"")
-    entrada = entrada.replace("', '", " ")
+#Insert na tabela de modelos
+def insert_modelos_comparativos(nome, Ids_gerados, aprovacao, descricao):
+    return banco_com_paramentros("""INSERT INTO modelos (nome, Ids_gerados, aprovacao, descricao) values (?,?,?,?);""", [nome, Ids_gerados, aprovacao, descricao])
 
-    return entrada
+#Insert geral em varios bancos diferentes dependente a entrada
+def insert_geral_para_tabelas_secudarias(id_pagina, tabela, entrada):
+    for i in range(0, funcoes_gerais.ler_caracteres(entrada)):
+        banco_com_paramentros("""INSERT INTO {} (Id_pagina_ex, {}, Qtd) values (?,?,?);""".format(tabela, tabela), [id_pagina, funcoes_gerais.converte_string(entrada[i][0]), entrada[i][1]])
+    return True
+
+#Insert no banco
+def insert_banco_pagina(Id_Ext_Dominio, Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data):
+    
+
+    Id_Ext_Dominio = insert_banco_dominio(Id_Ext_Dominio)
+
+
+    return banco_com_paramentros("""INSERT INTO paginas (Id_Ext_Dominio, Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data) values (?,?,?,?,?,?,?);""", [Id_Ext_Dominio,  Url_pagina, Endereco_IP, Titulo_pagina, qtd_linhas_Pagina, Idioma_pagina, Data])
+
+
+
+"""
+Funcoes de delet
+"""
+
+#Deleta um extraido da tabela
+def delete_banco(id_entrada):
+    data_tuple = [id_entrada]
+    for i in select_banco_com_parametros("""SELECT Id_Ext_Dominio FROM paginas where ids = ?;""", data_tuple):
+        retorno_dominio = i
+    subtrair_dominio(retorno_dominio)
+    banco_com_paramentros("""delete from paginas where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from frases where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from palavras where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from tags where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from imagens where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from videos where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from audios where ids = ?;""", data_tuple)
+    banco_com_paramentros("""delete from links where ids = ?;""", data_tuple)
+    return True
+
+#Destruir modelos
+def destruir_modelos_classificados():
+    return banco_sem_parametros("""delete from modelos;""")
+
+#Deletar valor classificado
+def deletar_url_classificada(entrada):
+    banco_com_paramentros("""delete from classificados where Id_modelos like ?;""", [entrada])
+
+#Deletar todos os classificados
+def deletar_classificada():
+    banco_sem_parametros("""delete from classificados;""")
+
+#Deletar modelos 
+#Deleta um extraido da tabela
+def delete_modelo_banco(id_entrada):
+    return select_banco_com_parametros("""delete from modelos where ids = ?;""", [id_entrada])
+
+
+
+"""
+Gerando os CSV's para o trabalho nos modelos
+"""
+
+#Listar nomes dos csvs
+def nomes_arquivos():
+    arquivos =funcoes_gerais.retorno_arquivos_diretorio("csv")
+    ler_arquivos = []
+    for arquivo in arquivos:
+        ler_arquivos.append("csv/{}".format(arquivo))
+    return ler_arquivos
 
 #Extracao de banco para CSV I.A
 def extracao_csv(modelo, dominios):
-    #Banco conexao
-    conn = contactar_banco()
-    cursor = conn.cursor()
-
     #Criar diretorio para os csv's
     funcoes_gerais.criar_diretorio("csv")
-
     #Tabelas
     tabelas_bases = ["paginas", "dominios"]
     tabelas_secundarias = ["frases", "palavras", "tags", "imagens", "videos", "audios", "links"]
     tabelas_todas = tabelas_bases + tabelas_secundarias
 
+    #Dominios
     saida_dominios = []
-    for i in dominios.split('-'):
-        if len(i) != 0:
+    for i in funcoes_gerais.split_geral(dominios, "-"):
+        if funcoes_gerais.ler_caracteres(i) != 0:
             saida_dominios.append(i)
     dominios = saida_dominios
 
@@ -646,21 +482,18 @@ def extracao_csv(modelo, dominios):
         arquivo_csv = open(arquivo, "a+", encoding="utf-8")
 
         #Nome das colunas
-        sqlite_insert_with_param = """SELECT name FROM PRAGMA_TABLE_INFO('{}');""".format(tabela)
-        saida = cursor.execute(sqlite_insert_with_param).fetchall()
         colunas = []
-        for i in saida:
+        for i in select_banco_sem_parametros("""SELECT name FROM PRAGMA_TABLE_INFO('{}');""".format(tabela)):
             colunas.append(i)
-        
-        colunas = limpeza_header_tabelas(str(colunas))
-
+        colunas = funcoes_gerais.limpeza_header_tabelas(funcoes_gerais.converte_string(colunas), quebrador_csv)
+        #Escrever em um arquivo
         arquivo_csv.write("{}\n".format(colunas))
         arquivo_csv.close()
 
     #Tabela de páginas
     pesquisa_valores_dominios = []
     for valor_id in dominios:
-        valor_id = valor_id.split()
+        valor_id = funcoes_gerais.split_simples(valor_id)
 
         for tabela in tabelas_bases:
             #Primeiro executa o pagina para ter os valores e depois executa o de dominios
@@ -670,17 +503,13 @@ def extracao_csv(modelo, dominios):
                 arquivo_csv = open(arquivo, "a+", encoding="utf-8")
 
                 #Extrair valores da coluna
-                sqlite_insert_with_param = """SELECT * FROM paginas where ids = ? limit 1;"""
-                saida = cursor.execute(sqlite_insert_with_param, valor_id).fetchall()
-                conn.commit()
-
-                for linhas in saida:
+                for linhas in select_banco_com_parametros("""SELECT * FROM paginas where ids = ? limit 1;""", valor_id):
                     saida_coluna = ""
                     contador = 0
                     for coluna in linhas:
-                        arquivo_csv.write("{};".format(str(coluna)))
+                        arquivo_csv.write("{};".format(funcoes_gerais.converte_string(coluna)))
                         if contador == 1:
-                            saida_coluna = str(coluna)
+                            saida_coluna = funcoes_gerais.converte_string(coluna)
                         contador = contador + 1
 
                     arquivo_csv.write("\n")
@@ -692,7 +521,7 @@ def extracao_csv(modelo, dominios):
     #CSV de dominios
     pesquisa_valores_dominios = sorted(set(pesquisa_valores_dominios))
     for pesquisa_select in pesquisa_valores_dominios:
-        pesquisa_select = pesquisa_select.split()
+        pesquisa_select = funcoes_gerais.split_simples(pesquisa_select)
 
         for tabela in tabelas_bases:
             #Primeiro executa o pagina para ter os valores e depois executa o de dominios
@@ -701,69 +530,85 @@ def extracao_csv(modelo, dominios):
                 arquivo = "{}-{}.csv".format(modelo, tabela)
                 arquivo_csv = open(arquivo, "a+", encoding="utf-8")
                 #Extrair valores da coluna
-                sqlite_insert_with_param = """SELECT * FROM dominios where ids = ? group by ids;"""
-                saida = cursor.execute(sqlite_insert_with_param, pesquisa_select).fetchall()
-                conn.commit()
-
-                for linhas in saida:
+                for linhas in select_banco_com_parametros("""select * from dominios where ids = ? group by ids;""", pesquisa_select):
                     for coluna in linhas:
-                        arquivo_csv.write("{};".format(str(coluna)))
+                        arquivo_csv.write("{};".format(funcoes_gerais.converte_string(coluna)))
                     arquivo_csv.write("\n")
                 arquivo_csv.close()
 
     #Tabela secundarias
     for ids in dominios:
-        ids = ids.split()
+        ids = funcoes_gerais.split_simples(ids)
 
         for tabela in tabelas_secundarias:
             arquivo = "{}-{}.csv".format(modelo, tabela)
             arquivo_csv = open(arquivo, "a+", encoding="utf-8")
-            sqlite_insert_with_param = """SELECT * FROM {} where Id_pagina_ex = ?;""".format(tabela)
-            saida = cursor.execute(sqlite_insert_with_param, ids).fetchall()
-            for linhas in saida:
+            for linhas in select_banco_com_parametros("""select * from {} where Id_pagina_ex = ?;""".format(tabela), ids):
                 for coluna in linhas:
-                    coluna = limpeza_conteudos_tabelas(str(coluna), tabela)
-                    arquivo_csv.write("{};".format(str(coluna)))
+                    coluna = funcoes_gerais.limpeza_conteudos_tabelas(funcoes_gerais.converte_string(coluna), tabela)
+                    arquivo_csv.write("{};".format(funcoes_gerais.converte_string(coluna)))
                 arquivo_csv.write("\n")
             arquivo_csv.close()
 
-    #Fecha banco
-    conn.close()
-
     #Mover csv
-    for i in glob.glob("*.csv"):
-        os.rename(i, "csv/{}".format(i))
-
+    for i in funcoes_gerais.retorno_glob_csv():
+        funcoes_gerais.renomear_arquivo(i)
     #Saida
     return True
-
-#Listar nomes dos csvs
-def nomes_arquivos():
-    arquivos = os.listdir("csv")
-    ler_arquivos = []
-    for arquivo in arquivos:
-        ler_arquivos.append("csv/{}".format(arquivo))
-    return ler_arquivos
 
 #Ler arquivos csvs
 #Limpar os arquivos para criar os modelos
 def gerar_modelos_csv():
-    arquivos_csv = nomes_arquivos()
-    #Criar dataset's
-    #dataset = []
-    for i in arquivos_csv:
-        grupo = i.split("-")
-        arquivo_modelo = i.split("/")
-        tabelas = grupo[1].split(".")        
-        if tabelas[0] == "dominios":
-            atual = pandas.read_csv(i, sep=';', index_col=0)
-        else:
-            atual = pandas.read_csv(i, sep=';', index_col=1)
-            #Deleta o ID do dataset das tabelas secundarias para avaliação
-            if tabelas[0] != "paginas":
-                atual = atual.drop('ids', axis=1)
+    #Confirmar consistencia
+    try:
+        arquivos_csv = nomes_arquivos()
+        #Criar dataset's
+        #dataset = []
+        for i in arquivos_csv:
+            grupo = funcoes_gerais.split_geral(i, "-")
+            arquivo_modelo = funcoes_gerais.split_geral(i, "/")
+            tabelas = funcoes_gerais.split_geral(grupo[1], ".")
+            if tabelas[0] == "dominios":
+                atual = pandas.read_csv(i, sep=';', index_col=0)
+            else:
+                atual = pandas.read_csv(i, sep=';', index_col=1)
+                #Deleta o ID do dataset das tabelas secundarias para avaliação
+                if tabelas[0] != "paginas":
+                    atual = atual.drop('ids', axis=1)
 
-        #Limpar coluna que não deve aparecer
-        atual = atual.loc[:, ~atual.columns.str.contains('^Unnamed')]
-        atual.to_csv("modelos/{}".format(arquivo_modelo[1]), sep=";", encoding='utf-8')
+            #Limpar coluna que não deve aparecer
+            atual = atual.loc[:, ~atual.columns.str.contains('^Unnamed')]
+            atual.to_csv("modelos/{}".format(arquivo_modelo[1]), sep=";", encoding='utf-8')
+    except:
+        #Log de erro
+        funcoes_gerais.registrar_log_erros("Nao foi gerado o csv de modelos")
+    return True
+
+
+
+"""
+Funcoes de destruir arquivos e diretorios
+"""
+
+#Destruir todas os dados das tabelas
+def destruir_banco_atual():
+    try:
+        #Cria uma conexao para fechar o banco e dai conseguir deletar o arquivo
+        conn = contactar_banco()
+        conn.commit()
+        conn.close()
+        #Delete o arquivo caso exista
+        funcoes_gerais.deletar_arquivo(banco)
+    except:
+        #Erro
+        funcoes_gerais.registrar_log_erros("Falha ao destruir o banco") 
+    return True
+
+#Destruir modelos csv pos analise
+def destruir_modelos_csv():
+    try:
+        funcoes_gerais.eliminar_conteudo_diretorio("csv")
+        funcoes_gerais.destruir_diretorio("csv")
+    except:
+        funcoes_gerais.registrar_log_erros("Falha ao destruir diretorio CSV")
     return True

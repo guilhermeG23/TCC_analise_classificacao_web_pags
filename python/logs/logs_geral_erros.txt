@@ -1,0 +1,91 @@
+2020-07-07 16:03:56.838811 - Erro ao entrar no index
+2020-07-07 16:04:35.328493 - Erro ao entrar no index
+2020-07-07 16:05:08.803908 - Erro ao entrar no index
+2020-07-07 17:02:26.202301 - Select sem entradas falhou
+2020-07-07 17:02:26.217260 - Select sem entradas falhou
+2020-07-07 17:02:26.233220 - Select sem entradas falhou
+2020-07-07 17:02:26.239237 - Erro ao entrar no index
+2020-07-07 17:02:31.535692 - Select sem entradas falhou
+2020-07-07 17:02:31.549013 - Select sem entradas falhou
+2020-07-07 17:02:31.563509 - Select sem entradas falhou
+2020-07-07 17:02:31.569860 - Erro ao entrar no index
+2020-07-07 17:02:32.489445 - Select sem entradas falhou
+2020-07-07 17:02:32.505186 - Select sem entradas falhou
+2020-07-07 17:02:32.525134 - Select sem entradas falhou
+2020-07-07 17:02:32.533113 - Erro ao entrar no index
+2020-07-07 17:02:36.560092 - Select sem entradas falhou
+2020-07-07 17:02:36.585024 - Erro ao entrar em paginas extraidas
+2020-07-07 22:52:55.309495 - Erro ao entrar em paginas extraidas
+2020-07-07 22:53:02.285290 - Erro ao entrar em paginas extraidas
+2020-07-07 22:57:35.270794 - Erro ao entrar em paginas extraidas
+2020-07-07 22:59:47.470158 - Erro ao entrar em paginas extraidas
+2020-07-07 23:00:05.443708 - Erro ao entrar em paginas extraidas
+2020-07-07 23:04:29.064931 - Erro ao entrar em paginas extraidas
+2020-07-07 23:08:01.068238 - Erro ao entrar em paginas extraidas
+2020-07-07 23:08:05.996800 - Erro ao entrar em paginas extraidas
+2020-07-07 23:09:39.575091 - Erro ao entrar em paginas extraidas
+2020-07-07 23:10:49.622563 - Erro ao entrar em paginas extraidas
+2020-07-07 23:12:01.971303 - Erro ao entrar em paginas extraidas
+2020-07-08 18:50:56.084056 - Erro ao processador modelos
+2020-07-08 18:50:56.626451 - Erro ao exibir teste de modelos
+2020-07-08 18:52:31.352214 - Falha ao destruir diretorio CSV
+2020-07-08 18:52:36.169220 - Erro ao processador modelos
+2020-07-08 18:52:36.487875 - Erro ao exibir teste de modelos
+2020-07-08 18:58:04.487562 - Erro ao processador modelos
+2020-07-08 18:58:04.538431 - Erro ao exibir teste de modelos
+2020-07-08 18:58:32.317701 - Falha ao destruir diretorio CSV
+2020-07-08 18:58:37.440252 - Erro ao processador modelos
+2020-07-08 18:58:37.777403 - Erro ao exibir teste de modelos
+2020-07-09 21:41:28.274637 - Erro ao processador modelos
+2020-07-09 21:43:51.967995 - Erro ao processador modelos
+2020-07-09 21:43:52.315835 - Erro ao exibir teste de modelos
+2020-07-10 18:32:19.554844 - Erro ao processador modelos
+2020-07-10 22:10:32.477026 - Erro ao processador modelos
+2020-07-10 22:10:32.491436 - Erro ao exibir teste de modelos
+2020-07-11 17:07:54.606545 - Erro ao processador modelos
+2020-07-11 17:07:54.932228 - Erro ao exibir teste de modelos
+2020-07-11 19:00:29.577643 - Erro ao processador modelos
+2020-07-11 19:00:29.919770 - Erro ao exibir teste de modelos
+2020-07-11 20:41:38.384245 - Erro ao processador modelos
+2020-07-11 20:41:58.254255 - Erro ao processador modelos
+2020-07-11 20:41:58.579894 - Erro ao exibir teste de modelos
+2020-07-12 11:12:20.459611 - Erro ao processador modelos
+2020-07-12 11:12:20.791372 - Erro ao exibir teste de modelos
+2020-07-13 11:44:42.170552 - Erro ao processador modelos
+2020-07-13 11:44:42.491260 - Erro ao exibir teste de modelos
+2020-07-13 21:16:24.659795 - Erro ao processador modelos
+2020-07-13 21:16:24.991471 - Erro ao exibir teste de modelos
+2020-07-15 16:33:51.450371 - Erro ao processador modelos
+2020-07-15 16:33:51.846794 - Erro ao exibir teste de modelos
+2020-07-15 16:36:15.811602 - Erro ao processador modelos
+2020-07-15 16:36:16.149927 - Erro ao exibir teste de modelos
+2020-07-16 07:49:01.392143 - Erro ao processador modelos
+2020-07-16 07:49:25.708352 - Erro ao processador modelos
+2020-07-16 07:49:25.748265 - Erro ao exibir teste de modelos
+2020-07-17 19:51:01.570099 - Erro ao analisar uma URL
+2020-07-17 19:51:53.291599 - Erro ao analisar uma URL
+2020-07-17 20:29:04.800953 - Erro ao analisar uma URL
+2020-07-17 20:38:09.296225 - Erro ao analisar uma URL
+2020-07-17 20:43:56.737490 - Erro ao analisar uma URL
+2020-07-17 20:44:40.919645 - Erro ao analisar uma URL
+2020-07-17 20:46:54.415122 - Erro ao analisar uma URL
+2020-07-17 20:47:09.398192 - Erro ao analisar uma URL
+2020-07-17 20:51:23.556153 - Erro ao analisar uma URL
+2020-07-17 20:54:35.103219 - Erro ao analisar uma URL
+2020-07-17 20:55:23.813048 - Erro ao analisar uma URL
+2020-07-17 20:55:48.281364 - Erro ao analisar uma URL
+2020-07-17 20:56:10.337806 - Erro ao analisar uma URL
+2020-07-17 20:57:07.676551 - Erro ao analisar uma URL
+2020-07-17 20:57:59.133665 - Erro ao analisar uma URL
+2020-07-17 20:58:51.704821 - Erro ao analisar uma URL
+2020-07-17 20:59:07.751724 - Erro ao analisar uma URL
+2020-07-17 20:59:55.589380 - Erro ao analisar uma URL
+2020-07-17 21:01:12.014659 - Erro ao analisar uma URL
+2020-07-17 21:01:18.497015 - Erro ao analisar uma URL
+2020-07-17 21:04:11.206029 - Erro ao analisar uma URL
+2020-07-17 21:05:02.493148 - Erro ao analisar uma URL
+2020-07-17 21:05:23.122072 - Erro ao analisar uma URL
+2020-07-17 21:07:37.762621 - Erro ao analisar uma URL
+2020-07-17 21:07:43.268228 - Erro ao analisar uma URL
+2020-07-17 21:08:52.739441 - Erro ao analisar uma URL
+2020-07-17 21:11:55.088648 - Erro ao analisar uma URL

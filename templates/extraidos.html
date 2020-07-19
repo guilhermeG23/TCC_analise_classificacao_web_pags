@@ -4,6 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{{ titulo }}</title>
+        <!--Icone-->
+        <link rel="shortcut icon" href="{{ icone }}" type="image/x-icon">
         <!--CSS-->
         {% for i in css %}
             <link rel="stylesheet" href="{{ i }}">
@@ -77,7 +79,7 @@
                         <td>{{ i[1] }}</td>          
                         <td>{{ i[2][:50] }}</td>  
                         <td>
-                            <form action="{{ url_for('detalhes') }}" method="GET">
+                            <form action="{{ url_for('detalhes_pagina') }}" method="GET">
                                 <input type="hidden" name="id_pagina" value="{{ i[0] }}">
                                 <button type="submit" class="btn btn-warning">Detalhes</button>
                             </form>
@@ -87,7 +89,7 @@
                                 <input type="hidden" name="id" id="id" value="{{ i[0] }}">
                                 <button type="submit" class="btn btn-danger">Deletar</button>
                             </form>
-                        </td>         
+                        </td>
                     </tr>
                 {% endfor %}
                 <tbody>

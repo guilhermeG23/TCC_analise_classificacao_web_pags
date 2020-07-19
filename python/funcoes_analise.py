@@ -1,13 +1,10 @@
-#Link: https://www.datacamp.com/community/tutorials/fuzzy-string-python
-
 #Funcoes para analise bruta
 
 #Libs para o funcionamento
 #Especifica
 from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 import pandas
-import nltk
-import numpy
 import cv2
 import numpy as np
 from sklearn.svm import SVC
@@ -15,16 +12,11 @@ from sklearn.svm import SVR
 from sklearn.svm import LinearSVC
 from sklearn.svm import LinearSVR
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 from PIL import Image
 import wget
 import time
 import timeit
-
-#Geral
-import re
-import glob
-import os
-import shutil
 
 #Outros arquivos
 import sqlite_funcoes
@@ -33,19 +25,56 @@ import funcoes_gerais
 #Retorno global 
 global retorno_global
 
+
+
+"""
+Criando diretorios
+"""
+
+#criar somente modelos
+def criar_diretorio_extraidas():
+    funcoes_gerais.criar_diretorio("imagens_extraidas")
+    return True
+
+#Criar somente modelos
+def criar_diretorio_modelos():
+    funcoes_gerais.criar_diretorio("imagens_modelos")
+    return True
+
+#Eliminar conteudo do diretorio
+def eliminar_conteudo_diretorio_modelos():
+    funcoes_gerais.eliminar_conteudo_diretorio("imagens_modelos")
+    return True
+
+def eliminar_conteudo_diretorio_extraidos():
+    funcoes_gerais.eliminar_conteudo_diretorio("imagens_extraidas")
+    return True
+
+#Criar diretorios
+def criar_diretorio_imagens():
+    criar_diretorio_extraidas()
+    criar_diretorio_modelos()
+    return True
+
+
+
+"""
+Outros
+"""
+
 #Pegando nome dos modelos com base no id
 def capturando_nome_modelos(modelos):
     #Capturando ids para fazer o select dos modelos
-    contador_modelos = modelos.split("-")
+    contador_modelos = funcoes_gerais.split_geral(modelos, "-")
     modelos_listados = [] 
     for i in contador_modelos:
-        if len(i) > 0:
+        if funcoes_gerais.ler_caracteres(i) > 0:
             modelos_listados.append(i)
     nomes_modelos = []
     #Realizando os selects
     for valores in modelos_listados:
         for nome in sqlite_funcoes.selecionar_modelos_analise(valores):
-            nome = re.sub('[^a-zA-Z0-9]', '', str(nome))
+            nome = funcoes_gerais.limpeza_string_simples(nome)
             nomes_modelos.append(nome)
     #Retorno dos selects
     return nomes_modelos
@@ -53,16 +82,16 @@ def capturando_nome_modelos(modelos):
 #Capturando a aprovacao dos modelos
 def capturando_aprovacao(modelos):
     #Capturando ids para fazer o select dos modelos
-    contador_modelos = modelos.split("-")
+    contador_modelos = funcoes_gerais.split_geral(modelos, "-")
     modelos_listados = [] 
     for i in contador_modelos:
-        if len(i) > 0:
+        if funcoes_gerais.ler_caracteres(i) > 0:
             modelos_listados.append(i)
     aprovacoes = []
     #Realizando os selects
     for valores in modelos_listados:
         for provas_modelos in sqlite_funcoes.select_aprovacoes(valores):
-            provas_modelos = re.sub('[^a-zA-Z0-9]', '', str(provas_modelos))
+            provas_modelos = funcoes_gerais.limpeza_string_simples(provas_modelos)
             aprovacoes.append(provas_modelos)
     #Retorno dos selects
     return aprovacoes
@@ -72,10 +101,10 @@ def calcular_aprovacao(valores_retorno, modelos):
 
     #Select para buscar estados do modelo
     todos_valores = []
-    modelos_ids = modelos.split("-")
+    modelos_ids = funcoes_gerais.split_geral(modelos, "-")
     for id in modelos_ids:
         for t in sqlite_funcoes.select_aprovacoes(id):
-            todos_valores.append(re.sub('[^a-zA-Z0-9]', '', str(t)))
+            todos_valores.append(funcoes_gerais.limpeza_string_simples(t))
 
     #Valores gerais e iniciais
     somador_total_aprovado = 0
@@ -84,7 +113,7 @@ def calcular_aprovacao(valores_retorno, modelos):
     contador_total_desaprovado = 0
 
     #Definir a quantidade de aprovados
-    for i in range(0, len(todos_valores)):
+    for i in range(0, funcoes_gerais.ler_caracteres(todos_valores)):
         if "Aprovado" == todos_valores[i]:
             somador_total_aprovado = valores_retorno[i] + somador_total_aprovado
             contador_total_aprovado = todos_valores.count("Aprovado")
@@ -98,23 +127,23 @@ def calcular_aprovacao(valores_retorno, modelos):
     porcentagem_aprovado = 0
     if todos_valores.count("Aprovado") >= 1:
         porcentagem_aprovado = somador_total_aprovado / contador_total_aprovado
-        porcentagem_aprovado = round(porcentagem_aprovado, 2)
+        porcentagem_aprovado = funcoes_gerais.arredondar_valores(porcentagem_aprovado, 2)
 
     #valores classificados com desaprovacao
     porcentagem_desaprovado = 0 
     if todos_valores.count("Bloqueado") >= 1:
         porcentagem_desaprovado = somador_total_desaprovado / contador_total_desaprovado
-        porcentagem_desaprovado = round(porcentagem_desaprovado, 2)
+        porcentagem_desaprovado = funcoes_gerais.arredondar_valores(porcentagem_desaprovado, 2)
 
     #Valores classificados com aprovacao com base em todos
-    porcentagem_aprovado_total = round((somador_total_aprovado / len(todos_valores)), 2)
+    porcentagem_aprovado_total = funcoes_gerais.arredondar_valores((somador_total_aprovado / funcoes_gerais.ler_caracteres(todos_valores)), 2)
 
     #valores classificados com desaprovacao
-    porcentagem_desaprovado_total = round((somador_total_desaprovado / len(todos_valores)), 2)
+    porcentagem_desaprovado_total = funcoes_gerais.arredondar_valores((somador_total_desaprovado / funcoes_gerais.ler_caracteres(todos_valores)), 2)
 
     #Valores não classificados    
     porcentagem_desclassificado = 100 - (porcentagem_aprovado_total + porcentagem_desaprovado_total)
-    porcentagem_desclassificado = round(porcentagem_desclassificado, 2)
+    porcentagem_desclassificado = funcoes_gerais.arredondar_valores(porcentagem_desclassificado, 2)
 
     #Decisão de saida:
     classificacao_analise = ""
@@ -131,15 +160,15 @@ def calcular_aprovacao(valores_retorno, modelos):
         classificacao_analise = "Desclassificado"
 
     #Medias
-    medias = [len(todos_valores), contador_total_aprovado, porcentagem_aprovado, contador_total_desaprovado, porcentagem_desaprovado, porcentagem_aprovado_total, porcentagem_desaprovado_total, porcentagem_desclassificado, classificacao_analise]
+    medias = [funcoes_gerais.ler_caracteres(todos_valores), contador_total_aprovado, porcentagem_aprovado, contador_total_desaprovado, porcentagem_desaprovado, porcentagem_aprovado_total, porcentagem_desaprovado_total, porcentagem_desclassificado, classificacao_analise]
 
     #retorno das medias das operacoes
     return medias
 
 #Quebrando o dominio para melhor analise
 def quebrando_dominio(entrada):
-    valores = entrada.split("/")
-    valores = valores[2].split(".")
+    valores = funcoes_gerais.split_geral(entrada, "/")
+    valores = funcoes_gerais.split_geral(valores[2], ".") 
     return valores
 
 #Removendo valores do array de dominios
@@ -149,7 +178,7 @@ def remover_valores_array_dominio(entrada):
     extensoes_desnecesarias = open("extensoes/extensoes_uri.txt", "r")
     tudo = entrada
     for i in extensoes_desnecesarias:
-        c = "{}".format(str(i).strip())
+        c = "{}".format(funcoes_gerais.split_simples(funcoes_gerais.converte_string(i)))
         try:
             tudo.remove(c)
         except:
@@ -158,8 +187,7 @@ def remover_valores_array_dominio(entrada):
 
 #Usando logica de fuzzy ratio para determinar a precisao
 #Busca de forma retangular X * Y operações
-def funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, tabelas, tipo_modelo, precisao_partial):
-    precisao_partial = int(precisao_partial)
+def funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, tabelas, tipo_modelo, dominios):
     #Retorno dos modelos
     retorno_modelos = []
     #Modelos a serem usados
@@ -168,144 +196,33 @@ def funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, tabelas, 
     for modelo in nomes_modelos:
         for tabela in tabelas:
             #Puxando as tabelas
-            tabela_temporaria = "csv/{}-{}.csv".format(nome_temporario_para_processo, tabela)
+            tabela_temporaria_extraida = "csv/{}-{}.csv".format(nome_temporario_para_processo, tabela)
             tabela_modelo = "modelos/{}-{}.csv".format(modelo, tabela)
             #Lendo CSV
-            tabela_temporaria = pandas.read_csv(tabela_temporaria, sep=';')
+            tabela_temporaria_extraida = pandas.read_csv(tabela_temporaria_extraida, sep=';')
             tabela_modelo = pandas.read_csv(tabela_modelo, sep=';')
             #Arrays de coluna
+            coluna_temporario_extraida = tabela_temporaria_extraida[tabela].values
             coluna_modelo = tabela_modelo[tabela].values
-            coluna_temporario = tabela_temporaria[tabela].values
-            #Temporarios
-            lista_colunas = []
-            temporario_colunas = []
             #Limpando repeticoes nas tabelas de modelos e temporarias
             #Ignorando repeticao
-            for i in coluna_modelo:
-                try:
-                    lista_colunas.index(i)
-                except ValueError:
-                    lista_colunas.append(i) 
-            for i in coluna_temporario:
-                try:
-                    temporario_colunas.index(i)
-                except ValueError:
-                    temporario_colunas.append(i) 
-            #Aplicando fuzzy ratio
-            somador = 0.0
-            iteracoes = 0
-
-            #Funcao N^Y comparacoes
-            for i in lista_colunas:
-                for t in temporario_colunas:
-
-                    #Possui seguranca
-                    if tipo_modelo == 1:
-                        i = str(i)
-                        t = str(t)
-                        if int(fuzz.ratio(i,t)) == 100:
-                            somador = somador + 1
-
-                    #Nao possui seguranca
-                    elif tipo_modelo == 2:
-                        i = str(i)
-                        t = str(t)
-                        valor_fuzzy = int(fuzz.partial_ratio(i,t))
-                        if  valor_fuzzy >= precisao_partial:
-                            somador = somador + (valor_fuzzy / 100)
-                            iteracoes = iteracoes + 1
-                    
-                    #token1
-                    elif tipo_modelo == 3:
-                        i = str(i)
-                        t = str(t)
-                        valor_fuzzy = int(fuzz.token_sort_ratio(i,t))
-                        if  valor_fuzzy >= precisao_partial:
-                            somador = somador + (valor_fuzzy / 100)
-                            iteracoes = iteracoes + 1
-
-                    #token2
-                    elif tipo_modelo == 4:
-                        i = str(i)
-                        t = str(t)
-                        valor_fuzzy = int(fuzz.token_set_ratio(i,t))
-                        if  valor_fuzzy >= precisao_partial:
-                            somador = somador + (valor_fuzzy / 100)
-                            iteracoes = iteracoes + 1
-
-
-                    #possui seguranca
-                    elif tipo_modelo == 5:
-                        
-                        tt = remover_valores_array_dominio(quebrando_dominio(t))
-                        ii = remover_valores_array_dominio(quebrando_dominio(i))
-
-                        for iii in ii:
-                            for ttt in tt:
-                                iii = str(iii)
-                                ttt = str(ttt)
-                                if int(fuzz.ratio(iii,ttt)) == 100:
-                                    somador = somador + 1
-
-                    #Não possui seguranca
-                    elif tipo_modelo == 6:
-
-                        tt = remover_valores_array_dominio(quebrando_dominio(t))
-                        ii = remover_valores_array_dominio(quebrando_dominio(i))
-
-                        for iii in ii:
-                            for ttt in tt:
-                                iii = str(iii)
-                                ttt = str(ttt)
-                                valor_fuzzy = int(fuzz.partial_ratio(iii,ttt))
-                                if  valor_fuzzy >= precisao_partial:
-                                    somador = somador + (valor_fuzzy / 100)
-                                    iteracoes = iteracoes + 1
-
-                    #Erros
-                    else:
-                        pass
-
-            #Adicionaod ao append o valor de comparacao
-
-            #Seguranca na iteracoes
-            #Se for 0 da erro de divisao
-            if iteracoes == 0:
-                iteracoes = 1
-
-            #ratio
-            if tipo_modelo == 1:
-                saida = round((somador / len(coluna_temporario)) * 100, 2)
-                retorno_modelos.append(saida)
-
-            #parcial
-            elif tipo_modelo == 2:
-                saida = round((somador / iteracoes) * 100, 2)
-                retorno_modelos.append(saida)
+            temporario_colunas = funcoes_gerais.limpar_repetidos_array(coluna_temporario_extraida)
+            modelo_colunas = funcoes_gerais.limpar_repetidos_array(coluna_modelo)
             
-            #Pacial token
-            elif tipo_modelo == 3:
-                saida = round((somador / iteracoes) * 100, 2)
-                retorno_modelos.append(saida)
+            if dominios:
+                modelo_colunas = remover_valores_array_dominio(quebrando_dominio(funcoes_gerais.limpeza_dominios(modelo_colunas)))
+                temporario_colunas = remover_valores_array_dominio(quebrando_dominio(funcoes_gerais.limpeza_dominios(temporario_colunas)))
 
-            #Pacial token
-            elif tipo_modelo == 4:
-                saida = round((somador / iteracoes) * 100, 2)
-                retorno_modelos.append(saida)
+            if tipo_modelo == "ratio":
+                valor = fuzz.ratio(modelo_colunas, temporario_colunas)
+            elif tipo_modelo == "parcial":
+                valor = fuzz.partial_ratio(modelo_colunas, temporario_colunas)
+            elif tipo_modelo == "token_set":
+                valor = fuzz.token_set_ratio(modelo_colunas, temporario_colunas)
+            elif tipo_modelo == "token_sort":
+                valor = fuzz.token_sort_ratio(modelo_colunas, temporario_colunas)
 
-            #ratio
-            if tipo_modelo == 5:
-                saida = round((somador / len(coluna_temporario)) * 100, 2)
-                retorno_modelos.append(saida)
-
-            #parcial
-            elif tipo_modelo == 6:
-                saida = round((somador / iteracoes) * 100, 2)
-                retorno_modelos.append(saida)
-
-            #Aqui quer dizer que lascou tudo
-            else:
-                pass
+            retorno_modelos.append(valor)
 
     #Retorno dos valoers
     return retorno_modelos
@@ -317,76 +234,90 @@ def ler_imagem(entrada):
 
 #Download da imagem
 def download_tratamento_imagem(arquivo, pasta, contador, tipo_tratamento_img):
-    #Download da imagem e garante e integridade da mesma
+    #Diretorio temporario
+    diretorio_temporario = "img_temporario"
+    funcoes_gerais.criar_diretorio(diretorio_temporario)
+    #Decisao
     try:
-        #Baixa a imagem
-        wget.download(arquivo, '{}/{}.jpeg'.format(pasta, contador))
-
-        #Imagem inicial
+        #Download
+        wget.download(arquivo, "{}/".format(diretorio_temporario))
+        #Inicializador da variavel
         img = None
-
-        #Decide se a imagem vai passar por tratamento
-        #Passa pelo tratamento de cinza
-        if tipo_tratamento_img == 0:
-            #Converte para a escala de cinza
-            img = Image.open('{}/{}.jpeg'.format(pasta, contador)).convert('L')
-            #Salva a imagem
+        #Listagem
+        for c in funcoes_gerais.retorno_arquivos_diretorio(diretorio_temporario):
+            #Decide se a imagem vai passar por tratamento
+            #Escala de cinza
+            if tipo_tratamento_img == "1":
+                img = Image.open("{}/{}".format(diretorio_temporario, c)).convert('L')
+            #Colorida
+            elif tipo_tratamento_img == "0":
+                img = Image.open("{}/{}".format(diretorio_temporario, c)).convert('RGB')
+            #Chabu
+            else:
+                pass
+            #salvar
             img.save('{}/{}.jpeg'.format(pasta, contador))
-        #Abre a imagem normal
-        elif tipo_tratamento_img == 1:
-            img = Image.open('{}/{}.jpeg'.format(pasta, contador))
-        else:
-            pass
-        #Garante a integridade
-        img.verify()
-        #Fecha a imagem final
-        img.close()
+            #Garante a integridade
+            img.verify()
+            #Fecha a imagem final
+            img.close()
     except:
         #Confirma se imagem corrompida ainda existe e deleta ela caso possivel
         funcoes_gerais.arquivos_imagem(pasta, contador)
     
+    #Diretorio temporario
+    funcoes_gerais.eliminar_conteudo_diretorio(diretorio_temporario)
+    funcoes_gerais.destruir_diretorio(diretorio_temporario)
+
     #So para ter um retorno mesmo
     return True
 
 #Teste dos modelos de regressao
 #classificacao binaria
-def teste_modelos_regressao(modelos, tipo_classificacao): 
+def teste_modelos_regressao(modelos, teste_modelos_regressao, precisao_semente): 
     #Concatenando os valores
     X = np.concatenate((modelos), axis=0)
     #Quantidade de imagens para o index do arra y
     y = []
-    for i in range(0, len(modelos)):
+    for i in range(0, funcoes_gerais.ler_caracteres(modelos)):
         y.append(i)
     y = np.array(y)
     Y = y.reshape(-1)
     # Reshape X with length of y
-    X = X.reshape(len(y), -1)
+    X = X.reshape(funcoes_gerais.ler_caracteres(y), -1)
     #Inicializando o classificador
     classifier_linear = None
     #Definindo semente padrão para as operacoes
-    np.random.seed(20)
+    if funcoes_gerais.converte_inteiro(precisao_semente) == 0:
+        np.random.seed()
+    else:
+        np.random.seed(funcoes_gerais.converte_inteiro(precisao_semente))
     #Iniciando o modelo de regressao
-    if tipo_classificacao == 0:
+    if teste_modelos_regressao == 0:
         #Classificacao de vetores de suporte linear.
         classifier_linear = LinearSVC()
-    elif tipo_classificacao == 1:
+    elif teste_modelos_regressao == 1:
         #Regressao vetorial de suporte linear.
         classifier_linear = LinearSVR()
     #Regrssao nao linear
-    elif tipo_classificacao == 2:
+    elif teste_modelos_regressao == 2:
         #C-support
         #Classificacao de vetores de suporte não-linear e não tam inteligente
         #vale por causa do uso dos resize em imagens
         classifier_linear = SVC()
-    elif tipo_classificacao == 3:
+    elif teste_modelos_regressao == 3:
         #Epsilon-support
-        #Classificacao de vetores de suporte não-linear e não tam inteligente
+        #Regressão de vetores de suporte não-linear e não tam inteligente
         #vale por causa do uso dos resize em imagens
         classifier_linear = SVR()
-    #Arvore de decisao
-    elif tipo_classificacao == 4:
+    #Arvore de decisao por classificacao de valores
+    elif teste_modelos_regressao == 4:
         #Utilizando arvore de decisao
         classifier_linear = DecisionTreeClassifier()
+    #Arvore de decisao por regressao de valores
+    elif teste_modelos_regressao == 5:
+        #Utilizando arvore de decisao
+        classifier_linear = DecisionTreeRegressor()
     #Deu ruim
     else:
         #Aconteceu alguma coisa e a decisao passou
@@ -394,287 +325,324 @@ def teste_modelos_regressao(modelos, tipo_classificacao):
     #Retorno da regressao
     return classifier_linear.fit(X,Y)
 
+#Comparar os modelos 
 def comparacao_modelo_teste(classifier_linear, imagens_modelos, diretorio_extracao):
+
     somador = []
     # Predict the category of image
-    for i in glob.glob("{}/*".format(diretorio_extracao)):
+    for i in funcoes_gerais.retorno_glob(diretorio_extracao):
         #Leia a imagem para teste
         teste = ler_imagem(i)
         #Prediz qual imagem parece mais com o atual teste
-        valor = int(classifier_linear.predict(teste.reshape(1,-1)))
+        valor = funcoes_gerais.converte_inteiro(classifier_linear.predict(teste.reshape(1,-1)))
 
-        #Converte os arrays em listas
-        teste = teste.tolist()
-        modelo = imagens_modelos[valor].tolist()
+        #Caso escape do range da lista = Não tem valor compativel na lista
+        try:
+            #Converte os arrays em listas
+            teste = teste.tolist()
+            modelo = imagens_modelos[valor]
+            modelo = modelo.tolist()
 
-        #Conveter todos as listas com arrays de unica linha
-        teste_final = []
-        for i in teste:
-            for c in i:
-                teste_final = teste_final + c
+            #Conveter todos as listas com arrays de unica linha
+            teste_final = converter_unico_array(teste)
+            modelo_final = converter_unico_array(modelo)
 
-        modelo_final = []
-        for i in modelo:
-            for c in i:
-                modelo_final = modelo_final + c
-
-        #Realiza a comparacao de valores entre o teste e o array de entrada e pega a quantidade de acerto entre os dois
-        acertos = 0
-        for i in range(0, len(teste_final)):
-            if teste_final[i] == modelo_final[i]:
-                acertos = acertos + 1
-
-        #Calcula quanto o modelo teste e a predicao sao parecidos e adiciona dentro do array
-        somador.append(float("{:.2}".format((acertos / len(modelo_final)) * 100)))
+            #Realiza a comparacao de valores entre o teste e o array de entrada e pega a quantidade de acerto entre os dois
+            somador.append(retorno_para_somador_modelos(teste_final, modelo_final))
+        except:
+            somador.append(0)
 
     #Retorna o valor final da precisao entre os modelos e a extracao
-    return float("{:.2}".format(sum(somador) / len(somador)))
+    return float("{:.2}".format(funcoes_gerais.soma_array(somador) / funcoes_gerais.ler_caracteres(somador)))
 
-#Modelo de comparacao de imagens
-def comparador_imagens(nome_temporario_para_processo, modelos, tabelas, precisao_partial, tipo_tratamento_img, tipo_classificacao):
-    #Precisao parcial
-    precisao_partial = int(precisao_partial)
-    #Destruir diretorio
-    destruir_diretorio_imagens()
-    #Criar diretorio
-    criar_diretorio_imagens()
-    #Retorno dos modelos
-    retorno_modelos = []
-    #Modelos a serem usados
-    nomes_modelos = capturando_nome_modelos(modelos)
-    #Aprovacoes dos modelos
-    aprovar = capturando_aprovacao(modelos)
-    #Modelos juntar desc
-    desc_imagens = []
-    for c in zip(nomes_modelos, aprovar):
-        desc_imagens.append("{}-{}".format(c[0], c[1]))
-    #Temporarios
-    lista_colunas = []
+#converter a unico array
+def converter_unico_array(entrada):
+    saida_final = []
+    for i in entrada:
+        for c in i:
+            saida_final = saida_final + c
+    return saida_final
+
+#Retorno da comparacao de matrizes
+def retorno_para_somador_modelos(teste_final, modelo_final):
+    igualdade = np.greater_equal(teste_final, modelo_final)
+    contador_false = 0
+    for c in igualdade:
+        if c == False:
+            contador_false += 1
+    #Quanto em porcentagem da imagem é verdadeira durante a comparacao
+    return ((funcoes_gerais.ler_caracteres(igualdade) - contador_false) / funcoes_gerais.ler_caracteres(igualdade)) * 100
+
+def realizando_operacao_extracao_imagens_download(diretorio_csv, nome_da_tabela, tipo_tabela, cinza, diretorio_extraidas):
+    #Puxando as tabelas
+    tabela_temporaria = "{}/{}-{}.csv".format(diretorio_csv, nome_da_tabela, tipo_tabela)
+    #Lendo CSV
+    tabela_temporaria = pandas.read_csv(tabela_temporaria, sep=';')
+    #Arrays de coluna
+    coluna_temporario = tabela_temporaria[tipo_tabela].values
+    #Decisao se ja existe o arquivo repetido
+    #temporario_colunas = funcoes_gerais.limpar_repetidos_array(coluna_temporario)
     temporario_colunas = []
-    somador = []
-    imagens_modelos = []
+    for i in coluna_temporario:
+        try:
+            temporario_colunas.index(i)
+        except ValueError:
+            temporario_colunas.append(i)
+    
+    #Temporario
+    contador=0
     imagens_extracao = []
-    #Gatilho pagina
-    gatilho = True
-    #Loop para comparacao dos modelos
-    for modelo in zip(nomes_modelos, desc_imagens):
-        for tabela in tabelas:
-            #Fazendo download da pagina de extracao somente uma vez
-            #Evitando retrabalho e mais gasto de tempo
-            if gatilho:
-                #Puxando as tabelas
-                tabela_temporaria = "csv/{}-{}.csv".format(nome_temporario_para_processo, tabela)
-                #Lendo CSV
-                tabela_temporaria = pandas.read_csv(tabela_temporaria, sep=';')
-                #Arrays de coluna
-                coluna_temporario = tabela_temporaria[tabela].values
-                #Decisao
-                for i in coluna_temporario:
-                    try:
-                        temporario_colunas.index(i)
-                    except ValueError:
-                        temporario_colunas.append(i)
-                #Temporario
-                contador=0
-                for i in temporario_colunas:
-                    #Download da imagem
-                    download_tratamento_imagem(i, "imagens_extraidas", contador, tipo_tratamento_img)
-                    contador=contador+1
-                #Imagem de comparacao para o teste
-                for i in glob.glob('imagens_extraidas/*'):
-                    imagens_extracao.append(ler_imagem(i))
-                #Alterar gatilho
-                gatilho = False
+    for i in temporario_colunas:
+        #Download da imagem
+        download_tratamento_imagem(i, diretorio_extraidas, contador, cinza)
+        contador=contador+1
+    #So um returne por graca
+    return True
 
-            #Puxando paginas que estao nos modelos
-            #Puxando as tabelas
-            tabela_modelo = "modelos/{}-{}.csv".format(modelo[0], tabela)
-            #Lendo CSV
-            tabela_modelo = pandas.read_csv(tabela_modelo, sep=';')
-            #Arrays de coluna
-            coluna_modelo = tabela_modelo[tabela].values
-            #Limpando repeticoes nas tabelas de modelos e temporarias
-            #Ignorando repeticao
-            for i in coluna_modelo:
-                try:
-                    lista_colunas.index(i)
-                except ValueError:
-                    lista_colunas.append(i) 
+#Lendo diretorios
+def lendo_imagens_diretorios(diretorio_extraidas):
+    imagens_extracao = []
+    #Imagem de comparacao para o teste
+    for i in funcoes_gerais.retorno_glob(diretorio_extraidas):
+        imagens_extracao.append(ler_imagem(i))
+    #Retorno
+    return imagens_extracao
 
-            #Limpando a entradas de imagens dos erros de não foi possível fazer o download
-            #CSV
-            contador=0
-            for i in lista_colunas:
-                #Identificar imagem
-                img_classifice = "{}-{}".format(contador, modelo[1])
-                #Download da imagem
-                download_tratamento_imagem(i, "imagens_modelos", img_classifice, tipo_tratamento_img)
-                contador=contador+1
-
-            #Imagem de comparacao modelos para o teste
-            for i in glob.glob('imagens_modelos/*'):
-                imagens_modelos.append(ler_imagem(i))
-
-            #Confirmar que existem valores para iniciar a operacao
-            if len(imagens_modelos) > 0 and len(imagens_extracao) > 0:
-                classificacao_regressao = teste_modelos_regressao(imagens_modelos, tipo_classificacao)
-                valor = comparacao_modelo_teste(classificacao_regressao, imagens_modelos, "imagens_extraidas")
-                somador.append(valor)
-            else:
-                somador.append(0)
-
-        #Destruindo as imagems após cada fim de modelo e reconstruindo o diretorio
-        #Isso e feito para quando o proximo modelo e caso exista mais de um, nao ler arquivo que nao faz parte do csv dele
-        reconstruir_diretorio_modelos()
-
-    #Destruir diretorios imagens
-    destruir_diretorio_imagens()
-    #retorno
+#Retorno da operacao de somador
+def retorno_somador(imagens_modelos, imagens_extracao, metodo_analise, precisao_semente):
+    somador = None
+    #Confirmar que existem valores para iniciar a operacao
+    if funcoes_gerais.ler_caracteres(imagens_modelos) > 0 and funcoes_gerais.ler_caracteres(imagens_extracao) > 0:
+        classificacao_regressao = teste_modelos_regressao(imagens_modelos, metodo_analise, precisao_semente)
+        valor = comparacao_modelo_teste(classificacao_regressao, imagens_modelos, "imagens_extraidas")
+        somador = valor
+    else:
+        somador = 0
     return somador
 
-#Uso de NLTK para a meio inteligente viastring
-def processamento_nltk_frases():
-    pass
+#Modelo de comparacao de imagens
+def processamento_extraidos_modelos(nome_temporario_para_processo, modelos, tabelas, metodo_analise, precisao_semente, cinza):
+    #Final
+    somador = []
+    #Temporarios
+    tabela = funcoes_gerais.limpeza_dominios(tabelas)
+    #Download imagem
+    realizando_operacao_extracao_imagens_download("csv", nome_temporario_para_processo, tabela, cinza, "imagens_extraidas")
+    #Modelos a serem usados
+    nomes_modelos = capturando_nome_modelos(modelos)
+    #Loop para comparacao dos modelos
+    for modelo in nomes_modelos:
+        realizando_operacao_extracao_imagens_download("modelos", modelo, tabela, cinza, "imagens_modelos")
+        somador.append(retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), metodo_analise, precisao_semente))
+        eliminar_conteudo_diretorio_modelos()
+        criar_diretorio_modelos()
+    eliminar_conteudo_diretorio_extraidos()
+    return somador
 
-#Criar diretorios
-def criar_diretorio_imagens():
-    funcoes_gerais.criar_diretorio("imagens_extraidas")
-    funcoes_gerais.criar_diretorio("imagens_modelos")
-    return True
-
-#Destruir diretorios pos analise
-def destruir_diretorio_imagens():
-    funcoes_gerais.eliminar_conteudo_diretorio("imagens_extraidas")
-    funcoes_gerais.destruir_diretorio("imagens_extraidas")
-    funcoes_gerais.eliminar_conteudo_diretorio("imagens_modelos")
-    funcoes_gerais.destruir_diretorio("imagens_modelos")
-    return True
-
-#Destruir somente modelos
-def reconstruir_diretorio_modelos():
-    funcoes_gerais.eliminar_conteudo_diretorio("imagens_modelos")
-    funcoes_gerais.destruir_diretorio("imagens_modelos")
-    funcoes_gerais.criar_diretorio("imagens_modelos")
-    return True
 
 #Uso de funcoes brutais para pegar media geral de varios modelos
-def uso_funcoes_brutais(array_brutal, quantidade_operacoes, quantidade_modelos):
-        array_retorno = []
-        valor_modelo = 0
-        #Ler como matriz e somar todos os valores de mesmo tipo, depois aplicar a divisão pelo valor total maximo
-        for i in range(0, quantidade_modelos):
-            for t in range(0, quantidade_operacoes):
-                valor_momento = array_brutal[t][i]
-                valor_modelo = valor_modelo + valor_momento
-            valor_modelo = valor_modelo / quantidade_operacoes
-            #Caso estrapole por causa do uso de float
-            if valor_modelo > 100:
-                    valor_modelo = 100.00
-            array_retorno.append(valor_modelo)
+def arredondamento_para_modelo_multi_operacoes(entrada_zip, quantidade_operacoes):    
+    retorno = []
+    for i in entrada_zip:
+        retorno.append(funcoes_gerais.arredondar_valores(funcoes_gerais.soma_array(i) / quantidade_operacoes, 2))
+    return retorno
 
-        print("valores do array: {}\nQuantidade operacoes: {}\nQuantidade modelos: {}".format(array_brutal, quantidade_operacoes, quantidade_modelos))
-        #Retorno
-        return array_retorno
-
+#Arrumar tempo
+def arrumar_tempo(tempo):
+    if tempo > 60:
+        tempo = tempo / 60
+        tempo = "{:.4}".format(funcoes_gerais.converte_string(tempo))
+        tempo = "{} - Minuto\s".format(tempo)
+    else:
+        tempo = "{:.4}".format(funcoes_gerais.converte_string(tempo))
+        tempo = "{} - Segundo\s".format(tempo)
+    return tempo 
+    
 #Funcao para escolher o analisador 
-def escolher_analise(tipo_analise_modelo, nome_temporario_para_processo, modelos, precisao_partial):
+def escolher_analise(tipo_analise_modelo, nome_temporario_para_processo, modelos, precisao_semente, cinza):
+
     #Hora atual - Inicio operacao
     inicio = timeit.default_timer()
+
+    #Criar diretorio de imagens por garantia
+    criar_diretorio_imagens()
+
     #Uso de fuzzy para palavras da pagina
     if tipo_analise_modelo == "fuzzy_ratio_palavra":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["palavras"], 1, precisao_partial)
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "ratio", False)
+
     #Fuzzy parcial para decidir a string
-    elif tipo_analise_modelo == "fuzzy_partial_palavra":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["palavras"], 2, precisao_partial)
-    #Uso de fuzzy para uma frase da pagina
-    if tipo_analise_modelo == "fuzzy_ratio_frase":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 1, precisao_partial)
-    #Fuzzy parcial para decidir a frase
-    elif tipo_analise_modelo == "fuzzy_partial_frase":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 2, precisao_partial)
+    elif tipo_analise_modelo == "fuzzy_palavra":
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "parcial", False)
+
     #Fuzzy tokenset para analise de frase
-    elif tipo_analise_modelo == "fuzzy_tokenset_partial_frase":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 3, precisao_partial)
+    elif tipo_analise_modelo == "fuzzy_tokenset_frase":
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_set", False)
+
     #Fuzzy tokensort para analise de frase
-    elif tipo_analise_modelo == "fuzzy_tokensort_partial_frase":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 4, precisao_partial)
+    elif tipo_analise_modelo == "fuzzy_tokensort_frase":
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_sort", False)
+
     #Uso de fuzzy ratio para bater dominio
     elif tipo_analise_modelo == "dominio_ratio":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["dominios"], 5, precisao_partial)    
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "ratio", True)    
+
     #Uso de fuzzy parcial para dominio
     elif tipo_analise_modelo == "dominio_partial":
-        retorno_global = funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["dominios"], 6, precisao_partial)
+        retorno_global = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "parcial", True)
+
+    #Uso total dos fuzzys em mais de uma operacao por vez 
+    elif tipo_analise_modelo == "uso_total_fuzzy":
+        #Inicio do array brutal para qualquer um dos metodos ignorantes
+        #a = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "ratio", False)
+        b = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "parcial", False)
+        c = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_set", False)
+        d = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_sort", False)
+        #e = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "ratio", True)
+        f = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "parcial", True)
+        #Retorno comum para o calculo final
+        #retorno_global = arredondamento_para_modelo_multi_operacoes(zip(a, b, c, d, e, f), 6)
+        retorno_global = arredondamento_para_modelo_multi_operacoes(zip(b, c, d, f), 4)
+    
+    #Somente funcoes de método ratio
+    elif tipo_analise_modelo == "uso_total_fuzzy_ratio":
+        #Inicio do array brutal para qualquer um dos metodos ignorantes
+        a = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "ratio", False)
+        b = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "ratio", True)
+        #Retorno comum para o calculo final
+        retorno_global = arredondamento_para_modelo_multi_operacoes(zip(a, b), 2)
+
+    #Somente uso de funcoes de parcial
+    elif tipo_analise_modelo == "uso_total_fuzzy_parcial":
+        #Inicio do array brutal para qualquer um dos metodos ignorantes 
+        a = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["palavras"], "parcial", False)
+        b = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["dominios"], "parcial", True)
+        #Retorno comum para o calculo final
+        retorno_global = arredondamento_para_modelo_multi_operacoes(zip(a, b), 2)
+
+    #Somente uso de funcoes de token
+    elif tipo_analise_modelo == "uso_total_fuzzy_frase":
+        #Inicio do array brutal para qualquer um dos metodos ignorantes
+        a = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_set", False)
+        b = funcao_decisao_com_fuzzy(nome_temporario_para_processo, modelos, ["frases"], "token_sort", False)
+        #Retorno comum para o calculo final
+        retorno_global = arredondamento_para_modelo_multi_operacoes(zip(a, b), 2)
+
     #Analise de imagens
     #Classificação de vetores de suporte linear.
-    #Restricao linear
-    elif tipo_analise_modelo == "ClassLinearRegressionGray":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 0)
-    elif tipo_analise_modelo == "ClassLinearRegressionColor":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 0)
-    elif tipo_analise_modelo == "VectorLinearRegressionGray":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 1)
-    elif tipo_analise_modelo == "VectorLinearRegressionColor":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 1)
-    #Sem restricao linear
-    elif tipo_analise_modelo == "VectorLinearCGray":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 2)
-    elif tipo_analise_modelo == "VectorLinearCColor":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 2)
-    elif tipo_analise_modelo == "VectorLinearEpsilonGray":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 3)
-    elif tipo_analise_modelo == "VectorLinearEpsilonColor":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 3)
-    #Por arvore de descisao
-    elif tipo_analise_modelo == "TreeDecisionGray":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 4)
-    elif tipo_analise_modelo == "TreeDecisionColor":
-        retorno_global = comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 4)
-    #Tocando o terror
-    #Brutal fuzzy
-    elif tipo_analise_modelo == "brutal_Fuzzy_partial":
-        #Inicio do array brutal para qualquer um dos metodos ignorantes
-        array_brutal = []    
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["palavras"], 1, precisao_partial)) #fuzzy_ratio_palavra
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["palavras"], 2, precisao_partial)) #fuzzy_partial_palavra
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 1, precisao_partial)) #fuzzy_ratio_frase
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 2, precisao_partial)) #fuzzy_partial_frase
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 3, precisao_partial)) #fuzzy_tokenset_partial_frase
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["frases"], 4, precisao_partial)) #fuzzy_tokensort_partial_frase
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["dominios"], 5, precisao_partial)) #dominio_ratio
-        array_brutal.append(funcao_decisao_fuzzy_ratio(nome_temporario_para_processo, modelos, ["dominios"], 6, precisao_partial)) #dominio_partial
-        #Valores para executar a operacao
-        quantidade_operacoes = len(array_brutal)
-        quantidade_modelos = len(array_brutal[0])
-        #Retorno comum para o calculo final
-        retorno_global = uso_funcoes_brutais(array_brutal, quantidade_operacoes, quantidade_modelos)
+    #Regressao linear
+    elif tipo_analise_modelo == "LinearRegression_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 0, precisao_semente, cinza)
+    elif tipo_analise_modelo == "VectorLinearRegression_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 1, precisao_semente, cinza)
+    elif tipo_analise_modelo == "VectorLinearC_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 2, precisao_semente, cinza)
+    elif tipo_analise_modelo == "VectorLinearEpsilon_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 3, precisao_semente, cinza)
+    elif tipo_analise_modelo == "TreeDecisionClass_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 4, precisao_semente, cinza)
+    elif tipo_analise_modelo == "TreeDecisionRegre_imagens":
+        retorno_global = processamento_extraidos_modelos(nome_temporario_para_processo, modelos, ["imagens"], 5, precisao_semente, cinza)
+
     #Brutal predicao imagens
-    elif tipo_analise_modelo == "brutal_Img":
-        array_brutal = []    
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 0)) #ClassLinearRegressionGray
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 0)) #ClassLinearRegressionColor
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 1)) #VectorLinearRegressionGray
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 1)) #VectorLinearRegressionColor
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 2)) #VectorLinearCGray
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 2)) #VectorLinearCColor
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 3)) #VectorLinearEpsilonGray
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 3)) #VectorLinearEpsilonColor
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 0, 4)) #TreeDecisionGray
-        array_brutal.append(comparador_imagens(nome_temporario_para_processo, modelos, ["imagens"], precisao_partial, 1, 4)) #TreeDecisionColor
-        #Valores para executar a operacao
-        quantidade_operacoes = len(array_brutal)
-        quantidade_modelos = len(array_brutal[0])
-        #Retorno comum para o calculo final
-        retorno_global = uso_funcoes_brutais(array_brutal, quantidade_operacoes, quantidade_modelos)
+    elif tipo_analise_modelo == "Uso_total_processamento_imagens":
+        somador = []
+        #Temporarios
+        tabela = funcoes_gerais.limpeza_dominios(["imagens"])
+        #Download imagem
+        realizando_operacao_extracao_imagens_download("csv", nome_temporario_para_processo, tabela, cinza, "imagens_extraidas")
+        #Modelos a serem usados
+        nomes_modelos = capturando_nome_modelos(modelos)
+        #Loop para comparacao dos modelos
+        for modelo in nomes_modelos:
+            realizando_operacao_extracao_imagens_download("modelos", modelo, tabela, cinza, "imagens_modelos")
+            a = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 0, precisao_semente) #Linearregression
+            b = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 1, precisao_semente) #LinearVection
+            c = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 2, precisao_semente) #Classificacao vetores nao linear
+            d = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 3, precisao_semente) #Regressao vetores nao linear
+            e = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 4, precisao_semente) #Classifier tree
+            f = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 5, precisao_semente) #Regression tree
+            somador.append(funcoes_gerais.arredondar_valores(((a+b+c+d+e+f)/6), 2))
+            eliminar_conteudo_diretorio_modelos()
+            criar_diretorio_modelos()
+        retorno_global = somador
+
+    #Somente lineares
+    elif tipo_analise_modelo == "Uso_total_funcoes_lineares_imagens":
+        somador = []
+        #Temporarios
+        tabela = funcoes_gerais.limpeza_dominios(["imagens"])
+        #Download imagem
+        realizando_operacao_extracao_imagens_download("csv", nome_temporario_para_processo, tabela, cinza, "imagens_extraidas")
+        #Modelos a serem usados
+        nomes_modelos = capturando_nome_modelos(modelos)
+        #Loop para comparacao dos modelos
+        for modelo in nomes_modelos:
+            realizando_operacao_extracao_imagens_download("modelos", modelo, tabela, cinza, "imagens_modelos")
+            a = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 0, precisao_semente) #Linearregression
+            b = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 1, precisao_semente) #LinearVection
+            somador.append(funcoes_gerais.arredondar_valores(((a+b)/2), 2))
+            eliminar_conteudo_diretorio_modelos()
+            criar_diretorio_modelos()
+        retorno_global = somador
+
+    #Somente nao lineares
+    elif tipo_analise_modelo == "Uso_total_funcoes_nao_lineares_imagens":
+        somador = []
+        #Temporarios
+        tabela = funcoes_gerais.limpeza_dominios(["imagens"])
+        #Download imagem
+        realizando_operacao_extracao_imagens_download("csv", nome_temporario_para_processo, tabela, cinza, "imagens_extraidas")
+        #Modelos a serem usados
+        nomes_modelos = capturando_nome_modelos(modelos)
+        #Loop para comparacao dos modelos
+        for modelo in nomes_modelos:
+            realizando_operacao_extracao_imagens_download("modelos", modelo, tabela, cinza, "imagens_modelos")
+            a = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 2, precisao_semente) #Classificacao vetores nao linear
+            b = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 3, precisao_semente) #Regressao vetores nao linear
+            somador.append(funcoes_gerais.arredondar_valores(((a+b)/2),2))
+            eliminar_conteudo_diretorio_modelos()
+            criar_diretorio_modelos()
+        retorno_global = somador
+
+    #Somente arvore
+    elif tipo_analise_modelo == "Uso_total_funcoes_arvore_imagens":
+        somador = []
+        #Temporarios
+        tabela = funcoes_gerais.limpeza_dominios(["imagens"])
+        #Download imagem
+        realizando_operacao_extracao_imagens_download("csv", nome_temporario_para_processo, tabela, cinza, "imagens_extraidas")
+        #Modelos a serem usados
+        nomes_modelos = capturando_nome_modelos(modelos)
+        #Loop para comparacao dos modelos
+        for modelo in nomes_modelos:
+            realizando_operacao_extracao_imagens_download("modelos", modelo, tabela, cinza, "imagens_modelos")
+            a = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 4, precisao_semente) #Classifier tree
+            b = retorno_somador(lendo_imagens_diretorios("imagens_modelos"), lendo_imagens_diretorios("imagens_extraidas"), 5, precisao_semente) #Regression tree
+            somador.append(funcoes_gerais.arredondar_valores(((a+b)/2), 2))
+            eliminar_conteudo_diretorio_modelos()
+            criar_diretorio_modelos()
+        retorno_global = somador
+
     else:
         pass
-    #Hora final - Final da operacao
-    fim = timeit.default_timer()
+
+    #Destruir diretorios imagens
+    eliminar_conteudo_diretorio_extraidos()
+    eliminar_conteudo_diretorio_modelos()
 
     #Medias dos valores
     medias = calcular_aprovacao(retorno_global, modelos)
 
+    #Hora final - Final da operacao
+    fim = timeit.default_timer()
+
+    #tempo final
+    tempo_final = arrumar_tempo(fim-inicio)
+
+    #gravar no log
+    funcoes_gerais.registrar_log_comuns("{}-{}-{}".format(retorno_global, medias, tempo_final))
+
     #retorno do processamento
     #Retorno dos valores globais
-    #Medias
-    #Tempo para realizar a determinada operacao
-    return retorno_global, medias, int(fim-inicio)
+    return retorno_global, medias, tempo_final
