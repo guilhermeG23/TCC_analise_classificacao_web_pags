@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{ titulo }}</title>
+        <!--Icone-->
+        <link rel="shortcut icon" href="{{ icone }}" type="image/x-icon">
+        <!--CSS-->
+        {% for i in css %}
+            <link rel="stylesheet" href="{{ i }}">
+        {% endfor %}
+        <!--JS-->
+        {% for i in js %}
+            <script src="{{ i }}"></script> 
+        {% endfor %}
+    </head>
+    <body>
+
+        <!--Menu-->
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand" href="./">Classificador de página Web</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    {% for i in links_menu %}
+                    <li class="nav-item active">
+                            <a class="nav-link" href="{{ url_for(i) }}">{{ i }}<span class="sr-only">(current)</span></a>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item active">
+                      <button type="button" class="nav-link btn-transparente" data-toggle="modal" data-target="#ajuda_pagina_simples">Ajuda</button>
+                  </li>
+                </ul>
+            </div>
+        </nav>
+
+              <!--Ajuda-->
+              <div class="modal fade bd-example-modal-xl" id="ajuda_pagina_simples" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                  <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Ajuda:</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                              <div class="form-group">
+                                <label for="recipient-name" class="col-form-label">Trabalho de TCC - Objetivos:</label>                                
+                                <li><label for="recipient-name" class="col-form-label">Extração de página única HTML/DOM</label></li>
+                                <li><label for="recipient-name" class="col-form-label">Classificação de página WEB utilizando várias técnicas</label></li>
+                                <li><label for="recipient-name" class="col-form-label">Emprego de I.A e demais métodos para aplicar uma classificação</label></li>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+        <!--Corpo da página-->
+        <div class="container-pagina">
+
+            <h1 class="display-4">Entedendo o versionamento</h1>
+            <table class="table table-versoes">
+              <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Descrição</th>
+                </tr>
+              </thead>
+                <tbody>
+                    <tr class="table-success">
+                        <td>Estável</td>
+                        <td>Classes extras (Ruler, Avenger, MoonCancer, Alterego, Foreign, Shilder)</td>
+                        <td>Versão totalmente funcional;</td>
+                    </tr>
+                    <tr class="table-primary">
+                        <td>Alterações</td>
+                        <td>Classes de combate (Saber, Archer, Lancer)</td>
+                        <td>Versão totalmente funcional, porém ainda em fase de teste;</td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td>Instável</td>
+                        <td>Classes de suporte (Rider, Caster, Assassins)</td>
+                        <td>Versão instável porém com maior parte em funcionamento, realizando testes de qualidade e confiabilidade;</td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td>Totalmente instável</td>
+                        <td>Classe Berserker (Berserker)</td>
+                        <td>Versão totalmente instável, necessita de reformas gerais ou que maioria de seu funcionamento está comprometido, acusado quando necessita integrar grandes alterações;</td>
+                    </tr>
+                </tbody>
+            </table>  
+
+            <h1 class="display-4">Versões</h1>
+            <table class="table table-versoes" id="versoes-tabela" name="versoes-tabela">
+              <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Versão</th>
+                    <th scope="col">Codiname</th>
+                    <th scope="col">Data</th>
+                    <th scope="col">Descrição</th>
+                </tr>
+              </thead>
+                <tbody>
+                    {% for i in versoes %}
+                    <tr class="{{ i[5] }}">
+                        <td>{{ i[0] }}</td>            
+                        <td scope="row">{{ i[1] }}</td>          
+                        <td scope="row">{{ i[2] }}</td>          
+                        <td scope="row">{{ i[3] }}</td>          
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    <footer class="bg-dark navbar-brand footer">
+        <div class="container">
+            <p>{{ versao }}</p>
+        </div>
+    </footer>
+
+    </body>
+</html>

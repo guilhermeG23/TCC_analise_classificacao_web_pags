@@ -30,7 +30,6 @@ joblib==0.14.1
 Keras-Preprocessing==1.1.2
 Markdown==3.2.2
 MarkupSafe==1.1.1
-nltk==3.5
 numpy==1.18.3
 oauthlib==3.1.0
 opencv-python==4.2.0.34
@@ -55,6 +54,8 @@ selenium==3.141.0
 six==1.14.0
 sklearn==0.0
 soupsieve==2.0
+spicy==0.16.0
+statistics==1.0.3.5
 tensorboard==2.2.2
 tensorboard-plugin-wit==1.6.0.post3
 tensorflow==2.2.0

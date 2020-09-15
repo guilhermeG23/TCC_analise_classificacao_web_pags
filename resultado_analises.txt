@@ -1,0 +1,143 @@
+(TCC_Pratico) C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\python>python -W ignore criar_modelos.py C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\Links_utilizados\porno.txt modeloporno  
+Criado modelo: modeloporno
+Com: 78 de páginas registradas
+Sendo estas: ['https://fapdu.com/', 'https://beeg.com/', 'https://www.youporn.com/', 'https://www.redtube.com/', 'https://www.xnxx.com/', 'https://www.pornhub.com/', 'https://xhamster.com/', 'https://nhentai.net/', 'https://mundohentaioficial.com/', 'https://mangoporn.net/', 'https://mangoporn.net/movies/thinking-of-fucking-your-daddy-so-bad/', 'http://www.dvdtrailertube.com/', 'http://www.dvdtrailertube.com/My-Girl-Loves-Anal-9-Naughty-America-trailer-71485.html', 'https://www.hd-easyporn.com/', 'https://pornvibe.org/', 'https://pornvibe.org/shoplyfter-fuck-to-avoid-charges/', 'https://www.pussyspace.com/', 'http://www.gameofporn.net/', 'https://cameraprive.com/br/', 'http://www.gameofporn.net/video/myfamilypies-sofia-lee-step-sis-wont-quit', 'https://spankbang.com', 'https://www.redtube.com.br/', 'https://www.redtube.com.br/32931521', 'https://www.legalporno.com/', 'https://www.thepornlist.net/', 'https://thepornmap.com/pt/list/porn-lists/', 'https://sxyprn.com', 'https://www.elasnacam.com/', 'https://cameraprive.com/br', 'https://sxyprn.com/post/5ef9bb838af8d.html', 'https://boafoda.com', 'https://www.boafoda.com/videos/123961/varias-cenas-de-sexo-no-mesmo-video.html', 'https://www.boafoda.com/channels/879/atriz-porno', 'https://www.boafoda.com/channels/51/hentai', 'https://pornone.com', 'https://pornone.com/mature/i-blackmailed-and-fucked-my-friends-hot-mom/3193334/', 'https://youporn.com', 'https://www.youporn.com/watch/14890177/nf-busty-curvy-model-seduces-her-artist-for-intense-sex-s5e10/', 'https://www.youporn.com/watch/14497827/blonde-18-year-old-with-natural-huge-tits-gets-fucked-by-college-jock/', 'http://www.veporns.com/', 'http://www.veporns.com/category/brazzers-premium/1', 'https://www.theduckwebcomics.com/', 'https://www.dailymotion.com/video/xipbo', 'https://pornone.com/', 'https://hentaipornobr.com/', 'https://pt.pornhub.com/categories/hentai', 'https://www.tufos.com.br/', 'https://www.assistirhentai.com/', 'https://theporndude.com/pt', 'https://www.assoass.com/', 'https://www.porntrex.com/', 'https://txxx.com/?promo=10718', 'https://pt.xhamster.com/search/anal?sort=best', 'https://www.4tube.com/', 'http://www.spicytranny.com/pt/', 'https://theporndude.com/pt/3468/xhamster', 'https://www.pornocarioca.com/', 'https://javfinder.la/', 'https://www.xpaja.net/', 'http://www.fetishnetwork.com/t2/show.php?a=1098_1&path=&nats=MTAwMDAwMTY4Mi40LjEwLjEwLjAuMC4wLjAuMA', 'https://jav.guru/', 'http://abuseme.com/t2?aid=gc1984', 'https://avgle.com/', 'https://theporndude.com/pt/2308/abuseme', 'https://sxyprn.com/anal.html?__cf_chl_jschl_tk__=37da8a97464d3a4422046cdfc93339fe25b39757-1594164200-0-AVZ5aNa2X5cXHQupveUWhwcMIvY87hfRUuc9qavVms_3Fg0_dYv7hwdlnYNeCOeybNOXIWkndxD4s3Y2GKo8yg55mecvygjeDSeFXPMrI_mZEy93nxBw7J2uZniTXi6m2qtx0leQFXNUAFLivaf5vIYSXwzJk2KR4XrSC6Qs80GJPXIytezv4euct_CTeZjV6UhNrNRGmCABSaHDh3RcmaOU9O4P6UkA-Jr8a-NQcSIjCehFwHSpPufnQKOTjeFPEnRpQ-wISlex_PSS795DIaZ2-kPa6HGsGVt-lohNXXoBhBC0_-5p7FV-pXuqN0QDGMzFA0qW8sm2rbbon5scGMbb8zfjnwdwdshg5qDVOkYj', 'https://www.superhentais.com/', 'https://pt.pornhub.com/video?c=101&o=mv&t=t&cc=in', 'https://rule34.paheal.net/', 'https://theporndude.com/pt/1955/pornhubindian', 'https://hentaiplay.net/', 'https://www.sexy-youtubers.com/', 'http://hentaigasm.com/', 'https://theporndude.com/pt/1551/hentaiplay', 'https://network.nutaku.net/images/landing/tgp/22/page.html?ats=eyJhIjoxNzYsImMiOjU3NDExNDkwLCJuIjoxLCJzIjoxLCJlIjo5MTIzLCJwIjoyfQ==', 'https://www.pornolandia.xxx/', 'https://efukt.com/', 'https://fancentro.com/?fallbackPlaceholder=r%2FTFCBUiDm', 'https://tiny4k.com/tours/tube/?code=MzE2OTk6MjoxNDQ,29']
+
+(TCC_Pratico) C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\python>python -W ignore criar_modelos.py C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\Links_utilizados\noticias_modelo.txt modelonoticias 
+Criado modelo: modelonoticias
+Com: 10 de páginas registradas
+Sendo estas: ['https://g1.globo.com/', 'https://www.bbc.com/portuguese', 'https://news.google.com/', 'https://www.terra.com.br/', 'https://www.r7.com/', 'https://veja.abril.com.br/', 'https://www.globo.com/', 'https://www.estadao.com.br/', 'https://www.band.uol.com.br/', 'https://www.bol.uol.com.br/']
+
+(TCC_Pratico) C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\python>python -W ignore criar_modelos.py C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\Links_utilizados\google.txt modeloteste
+Criado modelo: modeloteste
+Com: 1 de páginas registradas
+Sendo estas: ['https://www.google.com/']
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.google.com/
+Modelo Base: modelonoticias com 9 páginas
+Precisão Fuzzy: 91.0%
+Total predição de imagens: 
+        * Mediana: 69.5%
+        * Média: 70.0%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 91%
+        * Modelo TFID: 4%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.xvideos.com/
+Modelo Base: modelonoticias com 9 páginas
+Precisão Fuzzy: 40.0%
+Total predição de imagens: 
+        * Mediana: 55.5%
+        * Média: 56.83%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 40%
+        * Modelo TFID: 1%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.uol.com.br/
+Modelo Base: modelonoticias com 9 páginas
+Precisão Fuzzy: 70.0%
+Total predição de imagens: 
+        * Mediana: 54.0%
+        * Média: 55.33%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 70%
+        * Modelo TFID: 0%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.microsoft.com
+Modelo Base: modelonoticias com 9 páginas
+Precisão Fuzzy: 68.0%
+Total predição de imagens: 
+        * Mediana: 74.0%
+        * Média: 71.5%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 68%
+        * Modelo TFID: 1%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.google.com/
+Modelo Base: modeloteste com 1 páginas
+Precisão Fuzzy: 100.0%
+Total predição de imagens: 
+        * Mediana: 100.0%
+        * Média: 84.67%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 100%
+        * Modelo TFID: 100%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.xvideos.com/
+Modelo Base: modeloteste com 1 páginas
+Precisão Fuzzy: 36.0%
+Total predição de imagens: 
+        * Mediana: 25.0%
+        * Média: 24.33%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 35%
+        * Modelo TFID: 15%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.uol.com.br/
+Modelo Base: modeloteste com 1 páginas
+Precisão Fuzzy: 57.0%
+Total predição de imagens: 
+        * Mediana: 25.5%
+        * Média: 22.33%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 56%
+        * Modelo TFID: 10%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.microsoft.com
+Modelo Base: modeloteste com 1 páginas
+Precisão Fuzzy: 42.0%
+Total predição de imagens: 
+        * Mediana: 34.0%
+        * Média: 29.5%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 41%
+        * Modelo TFID: 14%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.google.com/
+Modelo Base: modeloporno com 77 páginas
+Precisão Fuzzy: 100.0%
+Total predição de imagens: 
+        * Mediana: 63.5%
+        * Média: 55.17%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 100%
+        * Modelo TFID: 4%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.xvideos.com/
+Modelo Base: modeloporno com 77 páginas
+Precisão Fuzzy: 86.0%
+Total predição de imagens: 
+        * Mediana: 51.0%
+        * Média: 49.67%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 86%
+        * Modelo TFID: 1%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.uol.com.br/
+Modelo Base: modeloporno com 77 páginas
+Precisão Fuzzy: 58.0%
+Total predição de imagens: 
+        * Mediana: 46.0%
+        * Média: 44.33%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 58%
+        * Modelo TFID: 0%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+Página alvo: https://www.microsoft.com
+Modelo Base: modeloporno com 77 páginas
+Precisão Fuzzy: 78.0%
+Total predição de imagens: 
+        * Mediana: 48.5%
+        * Média: 49.67%
+Predição por banco de palavras TFID: 
+        * Dicionário Fuzzy: 78%
+        * Modelo TFID: 1%
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+

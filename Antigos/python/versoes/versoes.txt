@@ -1,0 +1,26 @@
+0.0.1|Medusa - Rider|05/04/2020|Início do projeto, iniciando estudo e implementação dentro do projeto||table-warning
+0.0.2|Euryale – Archer|06/04/2020|Adicionadas funções de extração e armazenamento de dados||table-primary
+0.0.3|Stheno – Assassins|08/04/2020|Arrumando o banco e seu funcionamento para maior otimização nas operações||table-warning
+0.0.4|Medusa – Lancer|08/04/2020|Criados os iniciais métodos de comparação de informação com base em extração e o armazenado em banco||table-primary
+0.0.5|Gorgon – Avenger|14/04/2020|Criada interface para os componentes e funções||table-success
+0.0.6|Mash – Shielder|16/04/2020|Primeira Demo estável, arrumado problemas maiores sobre as funções||table-success
+0.0.7|Atalanta – Archer|02/04/2020|Redução de linhas de algumas funções internas a adicionados métodos de comparação sobre valores “domínios”||table-primary
+0.0.8|Atalanta (alter) – Berserker|02/04/2020|Redução de linhas de algumas funções internas a adicionados métodos de comparação sobre valores “domínios”||table-danger
+0.0.9|Okita - Saber|09/05/2020|Demostrado valores de comparação adicionais aos modelos de demonstração||table-primary
+0.1.0|Nobu - Archer|11/05/2020|Ajuste da apresentação de resultados, verificadas equações atuais de confirmação e iniciado implementação de novas funções||table-primary
+0.1.1|Scath - Caster|23/05/2020|Adicionada mais algumas funções para extração de páginas, melhorado modelo comparativo sobre domínio e melhor divisão de trabalho dentro da página||table-warning
+0.1.2|Valkire - Lancer|30/05/2020|Alterada a estrutura interna dos diretórios, adicionado uma análise de imagem simples||table-primary
+0.1.3|Okita Alter – Alterego|05/06/2020|Ajustes no CSS da página, correção de falhas em algumas funções, teste mais aprofundado com classificação de imagens e estudo de mais métodos||table-success
+1.0.4|Mordred - Rider|12/06/2020|Adicionando funcionabilidades para processamento de texto e melhorando a performasse da aplicação||table-warning
+0.1.5|Mama Raiko - Berserker|18/06/2020|Iniciada alterações nas funções e eliminado arquivos redundantes||table-danger
+0.1.6|Waver - Caster|20/06/2020|Reduzindo imports e unificando funções||table-warning
+0.1.7|Ryouma - Rider|25/06/2020|Modificando funções importantes na analise e extração||table-warning
+0.1.8|Sigurd - Saber|25/06/2020|Melhorias no quesito de desempenho e ajuste de funções|./Static/icones/sigurd.png|table-primary
+0.1.9|BB - MoonCancer|26/06/2020|Reparado todos os problemas após reformas internas do code e limpado várias redundâncias|./Static/icones/bb.png|table-success
+0.2.0|Heracles - Berserker|28/06/2020|Reparo no comparador de imagens, erros em excesso|./Static/icones/heracles.png|table-danger
+0.2.1|Parvati - Lancer|29/06/2020|Reparado todos os erros da versão anterior e realizados os testes|./Static/icones/parvati.jpg|table-primary
+0.2.2|Martha - Ruler|30/06/2020|Alterado chamadas de SQL e ajustadas algumas partes das funções, iniciando testes de desempenho do programa e adicionado um sistema de log simples|./Static/icones/martha-ruler.jpg|table-success
+0.2.3|Ibaraki - Berserker|03/07/2020|Necessita ajustar processo de classificação, método atual é falho|./Static/icones/ibaraki.png|table-danger
+0.2.4|Shiki - Assassins|04/07/2020|Realizado ajuste nos métodos de classificação|./Static/icones/shiki.png|table-warning
+0.2.5|Nero - Caster|07/07/2020|Software está funcionando corretamente no interno, ajustes nos métodos para melhor eficiencia e e uso dos modelos|./Static/icones/nero-caster.png|table-warning
+0.2.6|Nobuzerker - Berserker|17/07/2020|Alterando página para entender montagem dinâmica de html|./Static/icones/nobu.png|table-danger 
