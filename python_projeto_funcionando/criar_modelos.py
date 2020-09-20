@@ -106,7 +106,7 @@ def ler_pagina_html(url_pagina):
         driver.close()
         return html
     except:
-        return requests.get(url_pagina)
+        return requests.get(url_pagina, headers={'User-Agent': 'Custom'})
 
 def registrar_pagina_html(html, id_pagina):
     #Registrar página

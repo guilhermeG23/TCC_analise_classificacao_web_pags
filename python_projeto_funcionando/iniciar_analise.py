@@ -22,6 +22,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_selection import SelectPercentile
+from fake_useragent import UserAgent
 from PIL import Image
 import wget
 import time
@@ -100,9 +101,10 @@ def ler_pagina_html(url_pagina):
     except:
         return requests.get(url_pagina)
 
-
 def conferir_status(url):
-    pagina = requests.get(url)
+    ua = UserAgent()
+    header = {'User-Agent':str(ua.chrome)}
+    pagina = requests.get(url, headers=header)
     return pagina.status_code
 
 def quebrar_ids(entrada):
@@ -195,12 +197,6 @@ def modelos_regressao(modelos, teste_modelos_regressao):
     elif teste_modelos_regressao == 1:
         classifier_linear = LinearSVR()
     elif teste_modelos_regressao == 2:
-        classifier_linear = SVC()
-    elif teste_modelos_regressao == 3:
-        classifier_linear = SVR()
-    elif teste_modelos_regressao == 4:
-        classifier_linear = DecisionTreeClassifier()
-    elif teste_modelos_regressao == 5:
         classifier_linear = DecisionTreeRegressor()
     else:
         pass
@@ -257,15 +253,32 @@ def remover_arquivo(entrada):
 def arredondar_valores(valores, arredondamento):
     return round(valores, arredondamento)
 
+def pegar_top_10_palavras(palavras, valores):
+    modelo_matriz = {}
+    for i in range(0, len(palavras)):
+        modelo_matriz[palavras[i]] = valores[i]
+    sort_orders = sorted(modelo_matriz.items(), key=lambda x: x[1], reverse=True)
+    saida = []
+    top_10 = sort_orders[:10]
+    for i in top_10:
+        saida.append(i[0])
+    return saida
+
+
+#def iniciar_comparacoes(arquivo):
+
+#    with open(arquivo, "r", encoding="utf-8") as urls:
+#        for url in urls:
+
 def iniciar_comparacoes(url):
-
-    if conferir_status(url) == 200:
-
+    url = limpar_n(url)
+    if conferir_status(str(url)) == 200:
         try:
             #html
             html_analise = ler_pagina_html(url)
             html_para_leitura = BeautifulSoup(html_analise, 'html.parser')
             html_para_leitura_texto1 = html_para_leitura.get_text(separator=' ')
+            html_para_leitura_texto1 = html_para_leitura_texto1.lower()
             html_para_leitura_texto1 = html_para_leitura_texto1.split()
             html_para_leitura_texto = ' '.join(html_para_leitura_texto1)
 
@@ -279,13 +292,15 @@ def iniciar_comparacoes(url):
                     imagens_html_base.append("{}{}".format(pagina, k['src']))
                 else:
                     imagens_html_base.append(k['src'])
-
             criar_diretorio("imagem_base")
             contador=0
             for c in imagens_html_base:
                 download_tratamento_imagem(c, "imagem_base", contador)
                 dormir(1)
                 contador=contador+1
+            imagens_base = []
+            for c in retorno_glob("imagem_base"):
+                imagens_base.append(c)
 
             ##tfid
             vectorizer = TfidfVectorizer()
@@ -294,117 +309,112 @@ def iniciar_comparacoes(url):
             vector10 = vector10.toarray()
             vector10 = vector10[0].tolist()
             vector1 = vectorizer.get_feature_names()
+            top10_palavras_tfidf_alvo = pegar_top_10_palavras(vector1, vector10)
 
-
+            for i in todos_modelos():
+                #try:
+                pasta_modelo = "{}_{}".format(i[0], i[1])
+                print("-+"*24)
+                print("Página alvo: {}\nModelo Base: {} com {} páginas".format(url, i[1], len(quebrar_ids(i[2]))))
+                #HTML
+                paginas_modelo = []
+                paginas_modelo = np.array(paginas_modelo)
+                for j in quebrar_ids(i[2]):
+                    with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
+                        html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
+                        html_modelo = html_modelo.get_text(separator=' ')
+                        html_modelo = html_modelo.split()
+                        html_modelo = ' '.join(html_modelo)
+                        html_modelo = np.array(html_modelo)
+                        paginas_modelo = np.concatenate((paginas_modelo, html_modelo), axis=None)
+                    pagina_atual_modelo.close()
+                #Fuzzy Simples - Comprimento de cordas diferentes 
+                #valor1 = fuzz.token_set_ratio(html_para_leitura_texto, paginas_modelo)
+                #valor2 = fuzz.partial_token_set_ratio(html_para_leitura_texto, paginas_modelo)
+                #print("Precisão Fuzzy: \n\t* Ratio: {}\n\t* Partial: {}%".format(arredondar_valores(float(valor1),2), arredondar_valores(float(valor2),2)))
+                #Predição de imagens
+                for j in quebrar_ids(i[2]):
+                    with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
+                        html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
+                        html_para_imagens = html_modelo.find_all('img')
+                        imagens_modelo = []
+                        url_modelo = None
+                        ids_urls = select_url_pagina(j)
+                        for x in ids_urls:
+                            url_modelo = x[0]
+                        o = quebrar_link(url_modelo)
+                        pagina = "{}//{}".format(o[0], o[2])
+                        for k in html_para_imagens:
+                            try:
+                                if 'http' not in str(k['src']):
+                                    imagens_modelo.append("{}{}".format(pagina, k['src']))
+                                else:
+                                    imagens_modelo.append(k['src'])
+                            except:
+                                pass
+                    pagina_atual_modelo.close()
+                imagens_modelos = []
+                for c in retorno_glob("imagem_modelo_{}".format(pasta_modelo)):
+                    imagens_modelos.append(ler_imagem(c))
+                if len(imagens_modelos) != 0 and len(imagens_base) != 0:
+                    a = []
+                    for x in range(0,3):
+                        a.append(retorno_predicao_imagem(imagens_base, imagens_modelos, modelos_regressao(imagens_modelos, x)))
+                    #Valor confiavel e a mediana
+                    #print("Total predição de imagens: \n\t* Mediana: {}%\n\t* Média: {}%".format(arredondar_valores(statistics.median(a),2), arredondar_valores((sum(a)/6),2)))
+                    print("Total predição de imagens - Resultado pela mediana: {}%".format(arredondar_valores(statistics.median(a),2)))
+                else:
+                    if len(imagens_modelos) == 0 and len(imagens_base) == 0:
+                        print("Ambos base e modelo não possuem imagens para realizar a predição")
+                    elif len(imagens_modelos) == 0 and len(imagens_base) != 0:
+                        print("Não a imagens modelo para realizar a predição")
+                    elif len(imagens_modelos) != 0 and len(imagens_base) == 0:
+                        print("Não a imagens base para realizar a predição")
+                    else:
+                        pass
+                #TFID
+                paginas_modelo_tfid1 = []
+                paginas_modelo_tfid2 = []
+                top10_palavras_tfidf_modelo = []
+                for j in quebrar_ids(i[2]):
+                    with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
+                        html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
+                        html_modelo = html_modelo.get_text(separator=' ')
+                        html_modelo = html_modelo.lower()
+                        html_modelo = html_modelo.split()
+                        html_modelo = ' '.join(html_modelo)
+                        vectorizer = TfidfVectorizer()
+                        vector_pagina = vectorizer.fit_transform([html_modelo])
+                        t = vectorizer.get_feature_names()
+                        o = vector_pagina.toarray()
+                        o = o[0].tolist()
+                        top10_palavras_tfidf_modelo.append(pegar_top_10_palavras(t, o))
+                        paginas_modelo_tfid1.append(t)
+                        paginas_modelo_tfid2.append(o)
+                    pagina_atual_modelo.close()
+                vector2 = np.concatenate(paginas_modelo_tfid1, axis=None).tolist() #Fuzzy
+                #vector20 = np.concatenate(paginas_modelo_tfid2, axis=None).tolist() #Frequencia
+                medianas_token1 = fuzz.token_set_ratio(vector1, vector2)
+                medianas_token11 = fuzz.partial_token_set_ratio(vector1, vector2)
+                medianas_token21 = fuzz.token_set_ratio(top10_palavras_tfidf_alvo, top10_palavras_tfidf_modelo)
+                medianas_token31 = fuzz.partial_token_set_ratio(top10_palavras_tfidf_alvo, top10_palavras_tfidf_modelo)
+                #medianas_token10 = fuzz.token_set_ratio(vector10, vector20)
+                #medianas_token11 = fuzz.partial_token_set_ratio(vector10, vector20)
+                #print("Predição por banco de palavras TFID: \n\t* Dicionário Fuzzy:\n\t\t%* Ratio: {}%\n\t\t* Partial: {}%\n\t* Modelo TFID:\n\t\t* Ratio: {}%\n\t\t* Partial: {}%".format(medianas_token1, medianas_token2, medianas_token10, medianas_token11))
+                
+                print("Predição por banco de palavras TFID: - Dicionário Fuzzy total - Token set Ratio: {}%".format(medianas_token1))
+                print("Predição por banco de palavras TFID: - Dicionário Fuzzy total - Partial Token set Ratio: {}%".format(medianas_token11))
+                print("Predição por banco de palavras TFID: - Dicionário Fuzzy limitado top 10 - Token set Ratio: {}%".format(medianas_token21))
+                print("Predição por banco de palavras TFID: - Dicionário Fuzzy limitado top 10 - Partial Token set Ratio: {}%".format(medianas_token31))
+            eliminar_conteudo_diretorio("imagem_base")
+            destruir_diretorio("imagem_base")
         except:
             sys.exit("Erro ao ler a página alvo")
-
-
-        for i in todos_modelos():
-
-            #try:
-            pasta_modelo = "{}_{}".format(i[0], i[1])
-            print("-+"*24)
-            print("Página alvo: {}\nModelo Base: {} com {} páginas".format(url, i[1], len(quebrar_ids(i[2]))))
-
-            #HTML
-            paginas_modelo = []
-            paginas_modelo = np.array(paginas_modelo)
-            for j in quebrar_ids(i[2]):
-                with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
-                    html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
-                    html_modelo = html_modelo.get_text(separator=' ')
-                    html_modelo = html_modelo.split()
-                    html_modelo = ' '.join(html_modelo)
-                    html_modelo = np.array(html_modelo)
-                    paginas_modelo = np.concatenate((paginas_modelo, html_modelo), axis=None)
-                pagina_atual_modelo.close()
-            
-            #Fuzzy - Comprimento de cordas diferentes 
-            valor = fuzz.token_set_ratio(html_para_leitura_texto, paginas_modelo)
-            print("Precisão Fuzzy: {}%".format(arredondar_valores(float(valor),2)))
-
-            #Predição de imagens
-            for j in quebrar_ids(i[2]):
-                with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
-                    html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
-                    html_para_imagens = html_modelo.find_all('img')
-                    imagens_modelo = []
-                    url_modelo = None
-                    ids_urls = select_url_pagina(j)
-                    for x in ids_urls:
-                        url_modelo = x[0]
-                    o = quebrar_link(url_modelo)
-                    pagina = "{}//{}".format(o[0], o[2])
-                    for k in html_para_imagens:
-                        try:
-                            if 'http' not in str(k['src']):
-                                imagens_modelo.append("{}{}".format(pagina, k['src']))
-                            else:
-                                imagens_modelo.append(k['src'])
-                        except:
-                            pass
-                pagina_atual_modelo.close()
-            
-            imagens_modelos = []
-            for c in retorno_glob("imagem_modelo_{}".format(pasta_modelo)):
-                imagens_modelos.append(ler_imagem(c))
-            imagens_base = []
-            for c in retorno_glob("imagem_base"):
-                imagens_base.append(c)
-
-            if len(imagens_modelos) != 0 and len(imagens_base) != 0:
-                a = []
-                for x in range(0,6):
-                    a.append(retorno_predicao_imagem(imagens_base, imagens_modelos, modelos_regressao(imagens_modelos, x)))
-                print("Total predição de imagens: \n\t* Mediana: {}%\n\t* Média: {}%".format(arredondar_valores(statistics.median(a),2), arredondar_valores((sum(a)/6),2)))
-            else:
-                if len(imagens_modelos) == 0 and len(imagens_base) == 0:
-                    print("Ambos base e modelo não possuem imagens para realizar a predição")
-                elif len(imagens_modelos) == 0 and len(imagens_base) != 0:
-                    print("Não a imagens modelo para realizar a predição")
-                elif len(imagens_modelos) != 0 and len(imagens_base) == 0:
-                    print("Não a imagens base para realizar a predição")
-                else:
-                    pass
-
-            #TFID
-            paginas_modelo_tfid1 = []
-            paginas_modelo_tfid2 = []
-            for j in quebrar_ids(i[2]):
-                with open("teste_paginas/{}.txt".format(j), "r",encoding="UTF-8") as pagina_atual_modelo:
-                    html_modelo = BeautifulSoup(pagina_atual_modelo, 'html.parser')
-                    html_modelo = html_modelo.get_text(separator=' ')
-                    html_modelo = html_modelo.split()
-                    html_modelo = ' '.join(html_modelo)
-
-                    vectorizer = TfidfVectorizer()
-                    vector_pagina = vectorizer.fit_transform([html_modelo])
-
-                    t = vectorizer.get_feature_names()
-                    o = vector_pagina.toarray()
-
-                    paginas_modelo_tfid1.append(t)
-                    paginas_modelo_tfid2.append(o)
-
-                pagina_atual_modelo.close()
-
-            vector2 = np.concatenate(paginas_modelo_tfid1, axis=None).tolist() #Fuzzy
-            vector20 = np.concatenate(paginas_modelo_tfid2, axis=None).tolist() #Frequencia
-
-            medianas_token1 = fuzz.token_set_ratio(vector1, vector2)
-            medianas_token10 = fuzz.token_set_ratio(vector10, vector20)
-
-            print("Predição por banco de palavras TFID: \n\t* Dicionário Fuzzy: {}%\n\t* Modelo TFID: {}%".format(medianas_token1, medianas_token10))
-
-        print("-+"*24)
-
-        eliminar_conteudo_diretorio("imagem_base")
-        destruir_diretorio("imagem_base")
-
     else:
-        print("Pagina não está repondendo ou não encontrada")
+        print(requests.get(str(url)))
+        print("Pagina não está repondendo / não encontrada ou empregou meio ante extração simples: {}".format(url))
 
+    #urls.close()
 
 #python -W ignore iniciar_analise.py <link>
 if __name__ == "__main__":
