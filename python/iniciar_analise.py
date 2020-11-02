@@ -349,6 +349,6 @@ DEMONSTRAÇÃO DE MEIOS DE EXTRAÇÃO/CLASSIFICAÇÃO DE CONTEUDOS DA WEB E SEU 
 """
 
 #python -W ignore iniciar_analise.py <arquivo>
-#python -W ignore iniciar_analise.py C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\links_teste\alvo.txt
+#python -W ignore iniciar_analise.py C:\Users\guilhermebrechot\Desktop\TCC_Pratico\links_teste\alvo.txt
 if __name__ == "__main__":
     iniciar_comparacoes(sys.argv[1])

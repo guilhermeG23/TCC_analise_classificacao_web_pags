@@ -38,7 +38,7 @@ def criar_banco():
         pass    
     return True
 
-#Realizar selects sem parametros
+#Realizar operacoes sem parametros
 def select_banco_sem_parametros(entrada):
     conn = contactar_banco()
     cursor = conn.cursor()
@@ -47,7 +47,7 @@ def select_banco_sem_parametros(entrada):
     conn.close()
     return saida
 
-#Realizar operacoes com parametros no banco
+#Realizar operacoes com parametros
 def banco_com_paramentros(chamada, parametros):
     conn = contactar_banco()
     cursor = conn.cursor()
@@ -55,7 +55,10 @@ def banco_com_paramentros(chamada, parametros):
     conn.commit()
     conn.close()
     return saida
-        
+
+#Operacoes sobre o banco
+
+#Operacoes de select
 def selecionar_ultimo_id_pagina_modelo():
     return select_banco_sem_parametros("""select id_pagina from paginas order by id_pagina desc limit 1;""")
 
@@ -71,6 +74,7 @@ def selecionar_ultimo_modelo():
 def select_url_pagina(id_pagina):
     return select_banco_sem_parametros("""select URL from paginas where id_pagina = {};""".format(id_pagina))
 
+#Operacoes de insert
 def inserir_pagina_banco(url):
     banco_com_paramentros("""insert into paginas (URL) values (?);""", [url])
     return True

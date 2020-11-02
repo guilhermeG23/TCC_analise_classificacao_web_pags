@@ -1,5 +1,4 @@
-#Lib necessarias
-import requests #para fazer request HTTP
+import requests #Lib para request http
 from bs4 import BeautifulSoup #trabalhar com source-code
 from selenium import webdriver #Chamar o webdriver
 import socket #leitura de socket
@@ -58,22 +57,30 @@ def registrar_pagina_html(html, id_pagina): #Registrar página
     arquivo.close()
     return True
 
+#Conferir se o status da pagina esta respondendo
 def conferir_status(url):
     pagina = requests.get(url)
     return pagina.status_code
 
+#Download das imagens do source-code
 def download_tratamento_imagem(imagem, pasta, contador):
+    #Diretorio
     diretorio_temporario = "img_temporario_temporario_{}".format(funcoes_gerais.retorno_data_para_pasta())
+    #Testa - No momento que falha o try, ele aciona o except
     try:
-        funcoes_gerais.criar_diretorio(diretorio_temporario)
-        wget.download(imagem, "{}/".format(diretorio_temporario), bar=None)
-        for c in funcoes_gerais.retorno_arquivos_diretorio(diretorio_temporario):
+        funcoes_gerais.criar_diretorio(diretorio_temporario) #Cria o diretorio - Se existe, deixa quieto
+        wget.download(imagem, "{}/".format(diretorio_temporario), bar=None) #Download de forma oculta
+        img = None #Iniciando NONE na img para seguranca
+        for c in funcoes_gerais.retorno_arquivos_diretorio(diretorio_temporario): 
+            #Pega a imagem do diretorio temporario e converte para escala de cinza
             img = Image.open("{}/{}".format(diretorio_temporario, c)).convert('L')
-            img.save('{}/{}.jpeg'.format(pasta, contador))
+            img.save('{}/{}.jpeg'.format(pasta, contador)) #Salva a alteracao
+            #Confirma se alterou e ja fecha a imagem
             img.verify()
             img.close()  
     except:
         pass
+    #Eliminar todas os arquivos temporarios
     funcoes_gerais.eliminar_conteudo_diretorio(diretorio_temporario)
 
 #Criacao do modelo
@@ -138,7 +145,7 @@ DEMONSTRAÇÃO DE MEIOS DE EXTRAÇÃO/CLASSIFICAÇÃO DE CONTEUDOS DA WEB E SEU 
 """
 
 #python -W ignore criar_modelos.py <txt> <nome modelo>
-#python -W ignore criar_modelos.py C:\Users\guilhermebrechot\Desktop\TCC\TCC_Pratico\links_teste\modelo.txt modeloteste
+#python -W ignore criar_modelos.py C:\Users\guilhermebrechot\Desktop\TCC_Pratico\links_teste\modelo.txt modeloteste
 if __name__ == "__main__":
     funcoes_sql.criar_banco()
     ler_arquivo(sys.argv[1], sys.argv[2])
